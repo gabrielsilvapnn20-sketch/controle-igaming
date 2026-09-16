@@ -1,0 +1,91 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 222 47% 6%;
+    --foreground: 210 40% 96%;
+    --card: 222 40% 9%;
+    --card-foreground: 210 40% 96%;
+    --primary: 262 83% 62%;
+    --primary-foreground: 0 0% 100%;
+    --secondary: 222 30% 16%;
+    --secondary-foreground: 210 40% 96%;
+    --muted: 222 30% 14%;
+    --muted-foreground: 217 15% 62%;
+    --accent: 258 60% 20%;
+    --accent-foreground: 210 40% 96%;
+    --border: 222 30% 18%;
+    --input: 222 30% 16%;
+    --ring: 262 83% 62%;
+    --success: 152 62% 47%;
+    --danger: 0 72% 60%;
+    --warning: 38 92% 58%;
+    --radius: 0.85rem;
+  }
+
+  /* Modo claro (opcional; padrão é escuro via .dark no <html>) */
+  :root:not(.dark) {
+    --background: 210 40% 98%;
+    --foreground: 222 47% 11%;
+    --card: 0 0% 100%;
+    --card-foreground: 222 47% 11%;
+    --secondary: 210 40% 94%;
+    --secondary-foreground: 222 47% 11%;
+    --muted: 210 40% 94%;
+    --muted-foreground: 215 16% 45%;
+    --accent: 262 83% 95%;
+    --accent-foreground: 262 83% 40%;
+    --border: 214 30% 88%;
+    --input: 214 30% 88%;
+  }
+
+  * {
+    border-color: hsl(var(--border));
+  }
+
+  body {
+    background-color: hsl(var(--background));
+    color: hsl(var(--foreground));
+    font-feature-settings: 'cv02', 'cv03', 'cv04', 'cv11';
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* Fundo com gradientes sutis (glow violeta) */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    z-index: -1;
+    background:
+      radial-gradient(60rem 40rem at 15% -10%, hsl(262 83% 62% / 0.14), transparent 60%),
+      radial-gradient(50rem 40rem at 100% 0%, hsl(220 83% 60% / 0.1), transparent 55%);
+    pointer-events: none;
+  }
+}
+
+@layer utilities {
+  .glass {
+    background: linear-gradient(180deg, hsl(var(--card) / 0.85), hsl(var(--card) / 0.6));
+    backdrop-filter: blur(12px);
+    border: 1px solid hsl(var(--border) / 0.7);
+  }
+  .no-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+}
+
+/* Scrollbar sutil */
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+::-webkit-scrollbar-thumb {
+  background: hsl(var(--border));
+  border-radius: 999px;
+  border: 2px solid hsl(var(--background));
+}
+::-webkit-scrollbar-thumb:hover {
+  background: hsl(var(--muted-foreground) / 0.5);
+}
