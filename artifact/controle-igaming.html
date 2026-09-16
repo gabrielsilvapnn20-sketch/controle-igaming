@@ -1053,6 +1053,102 @@
     padding: 9px 12px;
     font-size: 13px;
   }
+
+  /* Model chooser cards */
+  .model-pick {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 8px;
+  }
+  @media (max-width: 480px) {
+    .model-pick {
+      grid-template-columns: 1fr;
+    }
+  }
+  .model-opt {
+    border: 1.5px solid var(--border);
+    border-radius: 13px;
+    padding: 13px 10px;
+    background: var(--card-solid);
+    text-align: center;
+    transition: border-color 0.15s, background 0.15s, transform 0.12s;
+  }
+  .model-opt:hover {
+    border-color: color-mix(in srgb, var(--accent) 45%, transparent);
+  }
+  .model-opt:active {
+    transform: scale(0.98);
+  }
+  .model-opt.active {
+    border-color: var(--accent);
+    background: var(--accent-soft);
+  }
+  .model-opt .mo-ico {
+    display: inline-grid;
+    place-items: center;
+    width: 34px;
+    height: 34px;
+    border-radius: 10px;
+    background: var(--surface-2);
+    color: var(--muted);
+  }
+  .model-opt.active .mo-ico {
+    background: color-mix(in srgb, var(--accent) 18%, transparent);
+    color: var(--accent);
+  }
+  .model-opt .mo-ico svg {
+    width: 17px;
+    height: 17px;
+  }
+  .model-opt .mo-t {
+    font-weight: 600;
+    font-size: 13px;
+    margin-top: 7px;
+  }
+  .model-opt .mo-d {
+    font-size: 11px;
+    color: var(--muted);
+    margin-top: 2px;
+    line-height: 1.35;
+  }
+  .model-opt.active .mo-t {
+    color: var(--accent);
+  }
+
+  /* Pills (status) */
+  .pill-group {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 7px;
+  }
+  .pill {
+    border: 1.5px solid var(--border);
+    border-radius: 999px;
+    padding: 7px 15px;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--muted);
+    background: transparent;
+    transition: all 0.14s;
+  }
+  .pill:hover {
+    color: var(--text);
+  }
+  .pill.active {
+    border-color: var(--accent);
+    background: var(--accent-soft);
+    color: var(--accent);
+  }
+  .deal-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+  }
+  @media (max-width: 480px) {
+    .deal-grid {
+      grid-template-columns: 1fr;
+    }
+  }
   .form-ok {
     border: 1px solid color-mix(in srgb, var(--success) 40%, transparent);
     background: var(--success-soft);
@@ -1334,17 +1430,17 @@
     const iso = (d) => addDias(hojeISO(), -d);
     const infs = [
       { nome: 'Ana Souza', instagram: '@anasouza', status: 'fechado', dataInicio: iso(90), modeloPagamento: 'percentual', percentualComissao: 50, observacoes: 'Alta conversão em apostas esportivas.' },
-      { nome: 'Bruno Lima', instagram: '@brunolima', status: 'fechado', dataInicio: iso(60), modeloPagamento: 'stories', observacoes: 'Foco em stories diários.' },
+      { nome: 'Bruno Lima', instagram: '@brunolima', status: 'fechado', dataInicio: iso(60), modeloPagamento: 'stories', valorPorStory: 120, qtdStoriesPadrao: 3, diasDivulgacao: 7, observacoes: 'Foco em stories diários.' },
       { nome: 'Carla Mendes', instagram: '@carlamendes', status: 'fechado', dataInicio: iso(120), modeloPagamento: 'fixo', valorFixo: 1500, recorrencia: 'mensal', observacoes: 'Contrato mensal fixo.' },
       { nome: 'Diego Rocha', instagram: '@diegorocha', status: 'pausado', dataInicio: iso(150), modeloPagamento: 'percentual', percentualComissao: 60, observacoes: 'Performance caiu, parceria pausada.' },
-      { nome: 'Elisa Faria', instagram: '@elisafaria', status: 'negociando', dataInicio: iso(10), modeloPagamento: 'stories', observacoes: 'Em fase de teste.' },
+      { nome: 'Elisa Faria', instagram: '@elisafaria', status: 'negociando', dataInicio: iso(10), modeloPagamento: 'stories', valorPorStory: 90, qtdStoriesPadrao: 2, diasDivulgacao: 5, observacoes: 'Em fase de teste.' },
     ];
     const now = new Date().toISOString();
     db = { config: { minhaParticipacao: 80, atualizadoEm: now }, configHistorico: [], influenciadores: [], lancamentos: [], seq: 1, exemplo: true };
     const rand = (a, b) => Math.round(a + Math.random() * (b - a));
     infs.forEach((inf) => {
       const id = db.seq++;
-      db.influenciadores.push({ id, criadoEm: now, percentualComissao: null, valorFixo: null, recorrencia: null, ...inf });
+      db.influenciadores.push({ id, criadoEm: now, percentualComissao: null, valorFixo: null, recorrencia: null, valorPorStory: null, qtdStoriesPadrao: null, diasDivulgacao: null, ...inf });
       const n = rand(6, 11);
       for (let i = 0; i < n; i++) {
         const depositos = Array.from({ length: rand(0, 4) }, () => rand(60, 700));
@@ -1797,6 +1893,10 @@
     if (inf.dataInicio) metaChips.push(`${svg('calendar')} Início ${fmtData(inf.dataInicio)}${dias != null ? ` · ${dias} dias de parceria` : ''}`);
     if (inf.modeloPagamento === 'percentual' && inf.percentualComissao != null) metaChips.push(`Comissão: ${fmtPct(inf.percentualComissao)}`);
     if (inf.modeloPagamento === 'fixo' && inf.valorFixo != null) metaChips.push(`Fixo: ${fmtBRL(inf.valorFixo)} / ${inf.recorrencia || ''}`);
+    if (inf.modeloPagamento === 'stories') {
+      if (inf.valorPorStory != null) metaChips.push(`${fmtBRL(inf.valorPorStory)} / story${inf.qtdStoriesPadrao != null ? ` · ${inf.qtdStoriesPadrao} stories` : ''}`);
+      if (inf.diasDivulgacao != null) metaChips.push(`${svg('calendar')} ${inf.diasDivulgacao} dias de divulgação`);
+    }
 
     const metric = (lbl, val, icon, tone) => `<div class="metric"><div class="m-lbl">${svg(icon)}${lbl}</div><div class="m-val tnum" ${tone ? `style="color:${tone}"` : ''}>${val}</div></div>`;
     const dicaIco = { sucesso: 'check', perigo: 'x', alerta: 'alert', info: 'info' };
@@ -2000,56 +2100,82 @@
   }
 
   /* ---- Form Influenciador ---- */
+  const MODELOS_INFO = [
+    { v: 'stories', ico: 'film', t: 'Stories', d: 'Valor por post' },
+    { v: 'fixo', ico: 'wallet', t: 'Fixo', d: 'Valor recorrente' },
+    { v: 'percentual', ico: 'percent', t: 'Percentual', d: '% dos depósitos' },
+  ];
   function openInfForm(inf) {
     const ed = !!inf;
-    const f = ed ? { ...inf } : { nome: '', instagram: '', status: 'negociando', dataInicio: '', modeloPagamento: 'stories', percentualComissao: '', valorFixo: '', recorrencia: 'mensal', observacoes: '' };
+    const f = ed
+      ? { valorPorStory: '', qtdStoriesPadrao: '', diasDivulgacao: '', percentualComissao: '', valorFixo: '', recorrencia: 'mensal', ...inf }
+      : { nome: '', instagram: '', status: 'negociando', dataInicio: '', modeloPagamento: 'stories', percentualComissao: '', valorFixo: '', recorrencia: 'mensal', valorPorStory: '', qtdStoriesPadrao: '', diasDivulgacao: '', observacoes: '' };
+
     const render = () => {
-      const especifico = f.modeloPagamento === 'percentual'
-        ? `<div class="hint-box v"><label style="display:block;color:var(--muted);font-size:13px;font-weight:500;margin-bottom:6px">Percentual de comissão (%)</label><input type="number" min="0" step="0.1" id="iPct" class="input" value="${f.percentualComissao ?? ''}" placeholder="Ex: 50"><p style="margin:8px 0 0">A cada lançamento, ela recebe esse % sobre a soma dos depósitos gerados.</p></div>`
+      const deal = f.modeloPagamento === 'percentual'
+        ? `<div class="deal-grid"><div class="field"><label>Comissão sobre depósitos (%)</label><input type="number" min="0" step="0.1" id="iPct" class="input" value="${f.percentualComissao ?? ''}" placeholder="Ex: 50"></div></div>
+           <p class="muted" style="font-size:12px;margin:10px 0 0">Ela recebe esse % sobre a soma dos depósitos gerados em cada lançamento.</p>`
         : f.modeloPagamento === 'fixo'
-        ? `<div class="hint-box s"><div class="form-row c2"><div class="field"><label>Valor fixo (R$)</label><input type="number" min="0" step="0.01" id="iFixo" class="input" value="${f.valorFixo ?? ''}" placeholder="Ex: 1500"></div><div class="field"><label>Recorrência</label><select class="select" id="iRec">${opt(['mensal', 'quinzenal', 'semanal'], f.recorrencia || 'mensal', { mensal: 'Mensal', quinzenal: 'Quinzenal', semanal: 'Semanal' })}</select></div></div><p style="margin:8px 0 0">O valor pago é herdado em cada lançamento, mas pode ser ajustado pontualmente.</p></div>`
-        : `<div class="hint-box f">No modelo <b style="color:var(--text)">stories</b>, o valor varia a cada post. Você informa a quantidade de stories e o valor cobrado diretamente em cada lançamento.</div>`;
-      return `<div class="modal-head"><h2>${ed ? 'Editar influenciador' : 'Novo influenciador'}</h2><p>Defina o modelo de pagamento — ele determina os campos dos lançamentos.</p><button class="icon-btn modal-x" id="mX">${svg('close')}</button></div>
+        ? `<div class="deal-grid"><div class="field"><label>Valor fixo (R$)</label><input type="number" min="0" step="0.01" id="iFixo" class="input" value="${f.valorFixo ?? ''}" placeholder="Ex: 1500"></div><div class="field"><label>Recorrência</label><select class="select" id="iRec">${opt(['mensal', 'quinzenal', 'semanal'], f.recorrencia || 'mensal', { mensal: 'Mensal', quinzenal: 'Quinzenal', semanal: 'Semanal' })}</select></div></div>
+           <p class="muted" style="font-size:12px;margin:10px 0 0">Já entra como valor pago em cada lançamento (editável em reajustes pontuais).</p>`
+        : `<div class="deal-grid"><div class="field"><label>Valor por story (R$)</label><input type="number" min="0" step="0.01" id="iVStory" class="input" value="${f.valorPorStory ?? ''}" placeholder="Ex: 250"></div><div class="field"><label>Qtd. de stories</label><input type="number" min="0" id="iQStory" class="input" value="${f.qtdStoriesPadrao ?? ''}" placeholder="Ex: 3"></div><div class="field"><label>Dias de divulgação</label><input type="number" min="0" id="iDias" class="input" value="${f.diasDivulgacao ?? ''}" placeholder="Ex: 7"></div></div>
+           <p class="muted" style="font-size:12px;margin:10px 0 0">Vira o padrão dos lançamentos — dá pra ajustar em cada post.</p>`;
+
+      const cards = MODELOS_INFO.map((m) => `<button type="button" class="model-opt ${f.modeloPagamento === m.v ? 'active' : ''}" data-mod="${m.v}"><span class="mo-ico">${svg(m.ico)}</span><div class="mo-t">${m.t}</div><div class="mo-d">${m.d}</div></button>`).join('');
+      const pills = ['negociando', 'fechado', 'pausado'].map((s) => `<button type="button" class="pill ${f.status === s ? 'active' : ''}" data-status="${s}">${STATUS_LBL[s]}</button>`).join('');
+
+      return `<div class="modal-head"><h2>${ed ? 'Editar influenciador' : 'Novo influenciador'}</h2><p>${ed ? 'Atualize os dados e o combinado da parceria.' : 'Só o nome é obrigatório — o resto você ajusta quando quiser.'}</p><button class="icon-btn modal-x" id="mX">${svg('close')}</button></div>
       <div class="modal-body">
         <div class="form-row c2"><div class="field"><label>Nome *</label><input class="input" id="iNome" value="${esc(f.nome)}" placeholder="Ex: Ana Souza"></div><div class="field"><label>@ do Instagram</label><input class="input" id="iInsta" value="${esc(f.instagram || '')}" placeholder="@anasouza"></div></div>
-        <div class="form-row c2"><div class="field"><label>Status</label><select class="select" id="iStatus">${opt(['negociando', 'fechado', 'pausado'], f.status, STATUS_LBL)}</select></div><div class="field"><label>Início da parceria</label><input type="date" class="input" id="iData" value="${f.dataInicio || ''}"></div></div>
-        <div class="field"><label>Modelo de pagamento *</label><select class="select" id="iMod">${opt(['stories', 'fixo', 'percentual'], f.modeloPagamento, { stories: 'Stories (valor por post)', fixo: 'Fixo (recorrente)', percentual: 'Percentual dos depósitos' })}</select></div>
-        <div id="espec">${especifico}</div>
-        <div class="field"><label>Observações</label><textarea class="textarea" id="iObs" placeholder="Notas sobre a parceria, condições, contatos…">${esc(f.observacoes || '')}</textarea></div>
+        <div class="field"><label>Como você paga essa parceria?</label><div class="model-pick" id="iModPick">${cards}</div></div>
+        <div class="box" id="dealBox">${deal}</div>
+        <div class="form-row c2">
+          <div class="field"><label>Status</label><div class="pill-group" id="iStatusPills">${pills}</div></div>
+          <div class="field"><label>Início da parceria</label><input type="date" class="input" id="iData" value="${f.dataInicio || ''}"></div>
+        </div>
+        <div class="field"><label>Observações <span class="muted" style="font-weight:400">(opcional)</span></label><textarea class="textarea" id="iObs" placeholder="Notas sobre a parceria, condições, contatos…">${esc(f.observacoes || '')}</textarea></div>
         <div id="iErr"></div>
       </div>
-      <div class="modal-foot"><button class="btn ghost" id="mCancel">Cancelar</button><button class="btn" id="mSave">${ed ? 'Salvar alterações' : 'Cadastrar'}</button></div>`;
+      <div class="modal-foot"><button class="btn ghost" id="mCancel">Cancelar</button><button class="btn" id="mSave">${ed ? 'Salvar alterações' : 'Cadastrar influenciador'}</button></div>`;
     };
+
     const readInto = () => {
-      f.nome = document.getElementById('iNome').value;
-      f.instagram = document.getElementById('iInsta').value;
-      f.status = document.getElementById('iStatus').value;
-      f.dataInicio = document.getElementById('iData').value;
-      f.observacoes = document.getElementById('iObs').value;
-      if (document.getElementById('iPct')) f.percentualComissao = document.getElementById('iPct').value;
-      if (document.getElementById('iFixo')) f.valorFixo = document.getElementById('iFixo').value;
-      if (document.getElementById('iRec')) f.recorrencia = document.getElementById('iRec').value;
+      const g = (id) => { const e = document.getElementById(id); return e ? e.value : undefined; };
+      f.nome = g('iNome'); f.instagram = g('iInsta'); f.dataInicio = g('iData'); f.observacoes = g('iObs');
+      if (g('iPct') !== undefined) f.percentualComissao = g('iPct');
+      if (g('iFixo') !== undefined) f.valorFixo = g('iFixo');
+      if (g('iRec') !== undefined) f.recorrencia = g('iRec');
+      if (g('iVStory') !== undefined) f.valorPorStory = g('iVStory');
+      if (g('iQStory') !== undefined) f.qtdStoriesPadrao = g('iQStory');
+      if (g('iDias') !== undefined) f.diasDivulgacao = g('iDias');
     };
+    const rerender = () => { readInto(); modalRoot.querySelector('.modal').innerHTML = render(); wire(); };
     const wire = () => {
       document.getElementById('mX').addEventListener('click', closeModal);
       document.getElementById('mCancel').addEventListener('click', closeModal);
-      document.getElementById('iMod').addEventListener('change', (e) => { readInto(); f.modeloPagamento = e.target.value; openModalKeep(); });
       document.getElementById('mSave').addEventListener('click', salvar);
+      modalRoot.querySelectorAll('#iModPick .model-opt').forEach((b) => b.addEventListener('click', () => { if (b.dataset.mod !== f.modeloPagamento) { f.modeloPagamento = b.dataset.mod; rerender(); } }));
+      modalRoot.querySelectorAll('#iStatusPills .pill').forEach((b) => b.addEventListener('click', () => {
+        f.status = b.dataset.status;
+        modalRoot.querySelectorAll('#iStatusPills .pill').forEach((p) => p.classList.toggle('active', p === b));
+      }));
     };
-    const openModalKeep = () => { modalRoot.querySelector('.modal').innerHTML = render(); wire(); };
+    const nOrNull = (v) => (v === '' || v == null ? null : Math.max(0, Number(v) || 0));
     const salvar = () => {
       readInto();
       const err = document.getElementById('iErr');
       if (!f.nome.trim()) { err.innerHTML = `<div class="form-err">O nome é obrigatório.</div>`; return; }
       const rec = {
-        nome: f.nome.trim(), instagram: f.instagram.trim() || null, status: f.status, dataInicio: f.dataInicio || null,
+        nome: f.nome.trim(), instagram: (f.instagram || '').trim() || null, status: f.status, dataInicio: f.dataInicio || null,
         modeloPagamento: f.modeloPagamento, observacoes: (f.observacoes || '').trim() || null,
-        percentualComissao: f.modeloPagamento === 'percentual' ? (f.percentualComissao === '' ? null : Math.max(0, Number(f.percentualComissao) || 0)) : null,
-        valorFixo: f.modeloPagamento === 'fixo' ? (f.valorFixo === '' ? null : Math.max(0, Number(f.valorFixo) || 0)) : null,
+        percentualComissao: f.modeloPagamento === 'percentual' ? nOrNull(f.percentualComissao) : null,
+        valorFixo: f.modeloPagamento === 'fixo' ? nOrNull(f.valorFixo) : null,
         recorrencia: f.modeloPagamento === 'fixo' ? (f.recorrencia || 'mensal') : null,
+        valorPorStory: f.modeloPagamento === 'stories' ? nOrNull(f.valorPorStory) : null,
+        qtdStoriesPadrao: f.modeloPagamento === 'stories' ? nOrNull(f.qtdStoriesPadrao) : null,
+        diasDivulgacao: f.modeloPagamento === 'stories' ? nOrNull(f.diasDivulgacao) : null,
       };
-      if (ed) { Object.assign(inf, rec); }
-      else { db.influenciadores.push({ id: db.seq++, criadoEm: new Date().toISOString(), ...rec }); }
+      if (ed) { Object.assign(inf, rec); } else { db.influenciadores.push({ id: db.seq++, criadoEm: new Date().toISOString(), ...rec }); }
       save(); closeModal(); router();
     };
     openModal(render());
@@ -2063,7 +2189,10 @@
     const modelo = inf.modeloPagamento;
     const f = ed
       ? { data: lanc.data, cadastros: String(lanc.cadastros ?? ''), depositos: (lanc.depositos || []).map(String), receitaBruta: String(lanc.receitaBruta ?? ''), percentualAplicado: String(lanc.percentualAplicado ?? ''), gastosExtras: String(lanc.gastosExtras ?? ''), observacoes: lanc.observacoes || '', quantidadeStories: lanc.quantidadeStories != null ? String(lanc.quantidadeStories) : '', valorCobrado: lanc.valorCobrado != null ? String(lanc.valorCobrado) : '', valorPago: lanc.valorPago != null ? String(lanc.valorPago) : '' }
-      : { data: hojeISO(), cadastros: '', depositos: [], receitaBruta: '', percentualAplicado: String(db.config.minhaParticipacao), gastosExtras: '', observacoes: '', quantidadeStories: '', valorCobrado: '', valorPago: modelo === 'fixo' && inf.valorFixo != null ? String(inf.valorFixo) : '' };
+      : { data: hojeISO(), cadastros: '', depositos: [], receitaBruta: '', percentualAplicado: String(db.config.minhaParticipacao), gastosExtras: '', observacoes: '',
+          quantidadeStories: modelo === 'stories' && inf.qtdStoriesPadrao != null ? String(inf.qtdStoriesPadrao) : '',
+          valorCobrado: modelo === 'stories' && inf.valorPorStory != null ? String(round2(inf.valorPorStory * (inf.qtdStoriesPadrao != null ? inf.qtdStoriesPadrao : 1))) : '',
+          valorPago: modelo === 'fixo' && inf.valorFixo != null ? String(inf.valorFixo) : '' };
     const num = (v) => (v === '' || v == null ? 0 : Number(v) || 0);
 
     const preview = () => {
