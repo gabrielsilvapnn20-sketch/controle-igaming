@@ -1,0 +1,2692 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<title>Controle iGaming</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E%F0%9F%8E%B0%3C/text%3E%3C/svg%3E" />
+<style>html,body{margin:0}img{max-width:100%}[hidden]{display:none!important}</style>
+</head>
+<body>
+<title>Controle iGaming</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link
+  href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap"
+  rel="stylesheet"
+/>
+<style>
+  :root {
+    /* Tema claro (padrão base) */
+    --bg: #f4f4fb;
+    --glow: rgba(124, 58, 237, 0.1);
+    --card: rgba(255, 255, 255, 0.9);
+    --card-solid: #ffffff;
+    --surface-2: #eeeef6;
+    --border: #e4e4ef;
+    --border-soft: #ececf4;
+    --text: #17172099;
+    --text: #1a1a26;
+    --muted: #6a6a80;
+    --accent: #7c3aed;
+    --accent-2: #a855f7;
+    --accent-soft: rgba(124, 58, 237, 0.1);
+    --success: #059669;
+    --success-soft: rgba(5, 150, 105, 0.12);
+    --danger: #dc2626;
+    --danger-soft: rgba(220, 38, 38, 0.1);
+    --warning: #d97706;
+    --warning-soft: rgba(217, 119, 6, 0.12);
+    --sky: #0284c7;
+    --radius: 16px;
+    --shadow: 0 10px 30px -12px rgba(24, 24, 40, 0.18);
+    color-scheme: light;
+  }
+
+  :root:not([data-theme='light']) {
+    color-scheme: dark;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme='light']) {
+      --bg: #08080f;
+      --glow: rgba(139, 92, 246, 0.16);
+      --card: rgba(21, 21, 32, 0.72);
+      --card-solid: #15151f;
+      --surface-2: #1c1c2b;
+      --border: #26263a;
+      --border-soft: #202030;
+      --text: #e9e9f4;
+      --muted: #9494ac;
+      --accent: #a78bfa;
+      --accent-2: #c084fc;
+      --accent-soft: rgba(167, 139, 250, 0.14);
+      --success: #34d399;
+      --success-soft: rgba(52, 211, 153, 0.14);
+      --danger: #f87171;
+      --danger-soft: rgba(248, 113, 113, 0.13);
+      --warning: #fbbf24;
+      --warning-soft: rgba(251, 191, 36, 0.14);
+      --sky: #38bdf8;
+      --shadow: 0 16px 40px -18px rgba(0, 0, 0, 0.7);
+    }
+  }
+  :root[data-theme='dark'] {
+    --bg: #08080f;
+    --glow: rgba(139, 92, 246, 0.16);
+    --card: rgba(21, 21, 32, 0.72);
+    --card-solid: #15151f;
+    --surface-2: #1c1c2b;
+    --border: #26263a;
+    --border-soft: #202030;
+    --text: #e9e9f4;
+    --muted: #9494ac;
+    --accent: #a78bfa;
+    --accent-2: #c084fc;
+    --accent-soft: rgba(167, 139, 250, 0.14);
+    --success: #34d399;
+    --success-soft: rgba(52, 211, 153, 0.14);
+    --danger: #f87171;
+    --danger-soft: rgba(248, 113, 113, 0.13);
+    --warning: #fbbf24;
+    --warning-soft: rgba(251, 191, 36, 0.14);
+    --sky: #38bdf8;
+    --shadow: 0 16px 40px -18px rgba(0, 0, 0, 0.7);
+  }
+
+  * {
+    box-sizing: border-box;
+  }
+  html,
+  body {
+    margin: 0;
+    height: 100%;
+  }
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Inter', system-ui, -apple-system, sans-serif;
+    font-size: 14px;
+    line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
+  }
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    z-index: -1;
+    pointer-events: none;
+    background:
+      radial-gradient(50rem 34rem at 12% -12%, var(--glow), transparent 60%),
+      radial-gradient(44rem 34rem at 100% 0%, var(--glow), transparent 55%);
+  }
+  h1,
+  h2,
+  h3 {
+    margin: 0;
+    letter-spacing: -0.02em;
+    text-wrap: balance;
+  }
+  button {
+    font-family: inherit;
+    cursor: pointer;
+  }
+  input,
+  select,
+  textarea {
+    font-family: inherit;
+    font-size: 14px;
+  }
+  .tnum {
+    font-variant-numeric: tabular-nums;
+  }
+  .muted {
+    color: var(--muted);
+  }
+
+  /* ---------- Layout ---------- */
+  .app {
+    display: flex;
+    min-height: 100%;
+  }
+  .sidebar {
+    position: fixed;
+    inset: 0 auto 0 0;
+    width: 256px;
+    display: flex;
+    flex-direction: column;
+    border-right: 1px solid var(--border);
+    background: var(--card);
+    backdrop-filter: blur(14px);
+    z-index: 20;
+  }
+  .brand {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 22px 22px 18px;
+  }
+  .brand-logo {
+    display: grid;
+    place-items: center;
+    width: 40px;
+    height: 40px;
+    border-radius: 12px;
+    background: linear-gradient(135deg, var(--accent), var(--accent-2));
+    color: #fff;
+    box-shadow: 0 8px 20px -6px var(--accent-soft);
+    flex: none;
+  }
+  .brand b {
+    display: block;
+    font-size: 14px;
+  }
+  .brand span {
+    font-size: 12px;
+    color: var(--muted);
+  }
+  .nav {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    padding: 8px 12px;
+    flex: 1;
+  }
+  .nav a {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 10px 12px;
+    border-radius: 12px;
+    text-decoration: none;
+    color: var(--muted);
+    font-weight: 500;
+    transition:
+      background 0.18s,
+      color 0.18s;
+  }
+  .nav a:hover {
+    background: var(--surface-2);
+    color: var(--text);
+  }
+  .nav a.active {
+    background: var(--accent-soft);
+    color: var(--accent);
+  }
+  .nav svg {
+    width: 18px;
+    height: 18px;
+    flex: none;
+  }
+  .side-tip {
+    margin: 12px;
+    padding: 14px;
+    border-radius: 12px;
+    border: 1px solid var(--border);
+    background: var(--surface-2);
+    font-size: 12px;
+    color: var(--muted);
+  }
+  .side-tip b {
+    color: var(--text);
+  }
+  .theme-toggle {
+    margin: 0 12px 14px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 9px;
+    border-radius: 10px;
+    border: 1px solid var(--border);
+    background: transparent;
+    color: var(--muted);
+    font-size: 12px;
+    font-weight: 500;
+  }
+  .theme-toggle:hover {
+    color: var(--text);
+    background: var(--surface-2);
+  }
+  .theme-toggle svg {
+    width: 15px;
+    height: 15px;
+  }
+  .brand-logo svg {
+    width: 20px;
+    height: 20px;
+  }
+  .chips svg {
+    width: 14px;
+    height: 14px;
+    flex: none;
+  }
+
+  main {
+    flex: 1;
+    margin-left: 256px;
+    padding: 28px 32px 32px;
+    max-width: 1200px;
+  }
+  @media (max-width: 900px) {
+    .sidebar {
+      display: none;
+    }
+    main {
+      margin-left: 0;
+      padding: 20px 16px 88px;
+    }
+  }
+
+  /* Bottom nav (mobile) */
+  .mobilenav {
+    display: none;
+    position: fixed;
+    inset: auto 0 0 0;
+    border-top: 1px solid var(--border);
+    background: var(--card);
+    backdrop-filter: blur(14px);
+    z-index: 20;
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+  }
+  .mobilenav a {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 3px;
+    padding: 9px 0;
+    text-decoration: none;
+    color: var(--muted);
+    font-size: 11px;
+    font-weight: 500;
+  }
+  .mobilenav a.active {
+    color: var(--accent);
+  }
+  .mobilenav svg {
+    width: 20px;
+    height: 20px;
+  }
+  @media (max-width: 900px) {
+    .mobilenav {
+      display: flex;
+    }
+  }
+
+  /* ---------- Header ---------- */
+  .page-head {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 16px;
+    align-items: flex-end;
+    justify-content: space-between;
+    margin-bottom: 22px;
+  }
+  .page-head h1 {
+    font-size: 26px;
+    font-weight: 800;
+  }
+  .page-head p {
+    margin: 4px 0 0;
+    color: var(--muted);
+    font-size: 14px;
+  }
+  .head-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    align-items: center;
+  }
+
+  /* ---------- Buttons ---------- */
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    border: 1px solid transparent;
+    border-radius: 11px;
+    padding: 9px 15px;
+    font-size: 13px;
+    font-weight: 600;
+    background: linear-gradient(135deg, var(--accent), var(--accent-2));
+    color: #fff;
+    box-shadow: 0 8px 20px -8px var(--accent-soft);
+    transition:
+      transform 0.14s,
+      filter 0.14s,
+      background 0.14s;
+  }
+  .btn:hover {
+    filter: brightness(1.07);
+  }
+  .btn:active {
+    transform: scale(0.98);
+  }
+  .btn svg {
+    width: 16px;
+    height: 16px;
+  }
+  .btn.ghost {
+    background: transparent;
+    color: var(--muted);
+    border-color: var(--border);
+    box-shadow: none;
+  }
+  .btn.ghost:hover {
+    color: var(--text);
+    background: var(--surface-2);
+    filter: none;
+  }
+  .btn.soft {
+    background: var(--accent-soft);
+    color: var(--accent);
+    box-shadow: none;
+  }
+  .btn.soft:hover {
+    filter: none;
+    background: color-mix(in srgb, var(--accent) 22%, transparent);
+  }
+  .btn.danger {
+    background: var(--danger);
+    box-shadow: none;
+  }
+  .btn.sm {
+    padding: 7px 12px;
+    font-size: 12px;
+  }
+  .btn:disabled {
+    opacity: 0.5;
+    pointer-events: none;
+  }
+  .icon-btn {
+    display: inline-grid;
+    place-items: center;
+    width: 32px;
+    height: 32px;
+    border-radius: 9px;
+    border: none;
+    background: transparent;
+    color: var(--muted);
+    transition:
+      background 0.15s,
+      color 0.15s;
+  }
+  .icon-btn:hover {
+    background: var(--surface-2);
+    color: var(--text);
+  }
+  .icon-btn.del:hover {
+    background: var(--danger-soft);
+    color: var(--danger);
+  }
+  .icon-btn svg {
+    width: 15px;
+    height: 15px;
+  }
+
+  /* ---------- Cards ---------- */
+  .card {
+    background: var(--card);
+    backdrop-filter: blur(12px);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+  }
+  .card-pad {
+    padding: 20px;
+  }
+  .card-head {
+    padding: 18px 20px;
+    border-bottom: 1px solid var(--border-soft);
+  }
+  .card-head h3 {
+    font-size: 15px;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .card-head p {
+    margin: 3px 0 0;
+    font-size: 13px;
+    color: var(--muted);
+  }
+  .card-head svg {
+    width: 16px;
+    height: 16px;
+  }
+
+  .grid {
+    display: grid;
+    gap: 16px;
+  }
+
+  /* KPI */
+  .kpi {
+    position: relative;
+    overflow: hidden;
+    padding: 18px;
+  }
+  .kpi .kpi-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+  }
+  .kpi .kpi-label {
+    font-size: 13px;
+    color: var(--muted);
+    font-weight: 500;
+  }
+  .kpi .kpi-ico {
+    width: 34px;
+    height: 34px;
+    border-radius: 10px;
+    display: grid;
+    place-items: center;
+  }
+  .kpi .kpi-ico svg {
+    width: 17px;
+    height: 17px;
+  }
+  .kpi .kpi-val {
+    font-size: 26px;
+    font-weight: 800;
+    letter-spacing: -0.03em;
+    margin-top: 10px;
+  }
+  .kpi .kpi-trend {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin-top: 7px;
+    font-size: 12px;
+    color: var(--muted);
+  }
+  .trend {
+    font-weight: 600;
+  }
+  .trend.up {
+    color: var(--success);
+  }
+  .trend.down {
+    color: var(--danger);
+  }
+
+  /* Badges */
+  .badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 3px 10px;
+    border-radius: 999px;
+    font-size: 12px;
+    font-weight: 600;
+    border: 1px solid transparent;
+  }
+  .badge .dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 999px;
+    background: currentColor;
+  }
+  .st-fechado {
+    color: var(--success);
+    background: var(--success-soft);
+    border-color: color-mix(in srgb, var(--success) 30%, transparent);
+  }
+  .st-negociando {
+    color: var(--warning);
+    background: var(--warning-soft);
+    border-color: color-mix(in srgb, var(--warning) 30%, transparent);
+  }
+  .st-pausado {
+    color: var(--muted);
+    background: var(--surface-2);
+    border-color: var(--border);
+  }
+  .mod-stories {
+    color: #d946ef;
+    background: rgba(217, 70, 239, 0.13);
+    border-color: rgba(217, 70, 239, 0.3);
+  }
+  .mod-fixo {
+    color: var(--sky);
+    background: rgba(2, 132, 199, 0.12);
+    border-color: rgba(2, 132, 199, 0.3);
+  }
+  .mod-percentual {
+    color: var(--accent);
+    background: var(--accent-soft);
+    border-color: color-mix(in srgb, var(--accent) 30%, transparent);
+  }
+
+  /* Segmented control */
+  .segmented {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+    padding: 4px;
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    background: var(--card);
+  }
+  .segmented button {
+    border: none;
+    background: transparent;
+    color: var(--muted);
+    font-size: 12px;
+    font-weight: 600;
+    padding: 7px 12px;
+    border-radius: 9px;
+    transition:
+      background 0.15s,
+      color 0.15s;
+  }
+  .segmented button.active {
+    background: linear-gradient(135deg, var(--accent), var(--accent-2));
+    color: #fff;
+  }
+  .segmented button:not(.active):hover {
+    color: var(--text);
+  }
+
+  /* Influencer cards */
+  .inf-grid {
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  }
+  .inf-card {
+    padding: 18px;
+    cursor: pointer;
+    transition:
+      transform 0.16s,
+      border-color 0.16s,
+      box-shadow 0.16s;
+  }
+  .inf-card:hover {
+    transform: translateY(-3px);
+    border-color: color-mix(in srgb, var(--accent) 45%, transparent);
+    box-shadow: 0 20px 40px -20px var(--accent-soft);
+  }
+  .inf-card .row {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 10px;
+  }
+  .inf-card .name {
+    font-size: 16px;
+    font-weight: 700;
+  }
+  .inf-card .foot {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    margin-top: 16px;
+    padding-top: 16px;
+    border-top: 1px solid var(--border-soft);
+  }
+  .inf-card .foot .lbl {
+    font-size: 12px;
+    color: var(--muted);
+  }
+  .inf-card .foot .big {
+    font-size: 18px;
+    font-weight: 800;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    margin-top: 2px;
+  }
+
+  /* Inputs */
+  .field {
+    display: block;
+  }
+  .field > label {
+    display: block;
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--muted);
+    margin-bottom: 6px;
+  }
+  .input,
+  .select,
+  .textarea {
+    width: 100%;
+    height: 40px;
+    padding: 0 12px;
+    border-radius: 10px;
+    border: 1px solid var(--border);
+    background: var(--card-solid);
+    color: var(--text);
+    outline: none;
+    transition:
+      border-color 0.15s,
+      box-shadow 0.15s;
+  }
+  .textarea {
+    height: auto;
+    min-height: 76px;
+    padding: 9px 12px;
+    resize: vertical;
+  }
+  .input:focus,
+  .select:focus,
+  .textarea:focus {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px var(--accent-soft);
+  }
+  .select {
+    appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%239494ac' stroke-width='2'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 10px center;
+    background-size: 18px;
+    padding-right: 34px;
+  }
+  .search {
+    position: relative;
+    flex: 1;
+    min-width: 200px;
+  }
+  .search svg {
+    position: absolute;
+    left: 11px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 16px;
+    height: 16px;
+    color: var(--muted);
+  }
+  .search .input {
+    padding-left: 34px;
+  }
+
+  /* Table */
+  .tbl-wrap {
+    overflow-x: auto;
+  }
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13.5px;
+  }
+  thead th {
+    text-align: left;
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--muted);
+    font-weight: 600;
+    padding: 12px 14px;
+    border-bottom: 1px solid var(--border);
+    white-space: nowrap;
+  }
+  tbody td {
+    padding: 12px 14px;
+    border-bottom: 1px solid var(--border-soft);
+    white-space: nowrap;
+  }
+  tbody tr:last-child td {
+    border-bottom: none;
+  }
+  tbody tr {
+    transition: background 0.13s;
+  }
+  tbody tr:hover {
+    background: var(--surface-2);
+  }
+  .ta-r {
+    text-align: right;
+  }
+  .pos {
+    color: var(--success);
+  }
+  .neg {
+    color: var(--danger);
+  }
+  .warn {
+    color: var(--warning);
+  }
+
+  /* Metric tile */
+  .metric {
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    background: var(--surface-2);
+    padding: 14px;
+  }
+  .metric .m-lbl {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 12px;
+    color: var(--muted);
+  }
+  .metric .m-lbl svg {
+    width: 14px;
+    height: 14px;
+  }
+  .metric .m-val {
+    font-size: 18px;
+    font-weight: 800;
+    margin-top: 5px;
+    letter-spacing: -0.02em;
+  }
+
+  /* Dica */
+  .dica {
+    display: flex;
+    gap: 11px;
+    padding: 12px;
+    border-radius: 12px;
+    border: 1px solid;
+  }
+  .dica svg {
+    width: 17px;
+    height: 17px;
+    flex: none;
+    margin-top: 1px;
+  }
+  .dica b {
+    font-size: 13px;
+  }
+  .dica p {
+    margin: 3px 0 0;
+    font-size: 12px;
+    color: var(--muted);
+  }
+  .d-sucesso {
+    color: var(--success);
+    background: var(--success-soft);
+    border-color: color-mix(in srgb, var(--success) 25%, transparent);
+  }
+  .d-perigo {
+    color: var(--danger);
+    background: var(--danger-soft);
+    border-color: color-mix(in srgb, var(--danger) 25%, transparent);
+  }
+  .d-alerta {
+    color: var(--warning);
+    background: var(--warning-soft);
+    border-color: color-mix(in srgb, var(--warning) 25%, transparent);
+  }
+  .d-info {
+    color: var(--sky);
+    background: rgba(2, 132, 199, 0.1);
+    border-color: rgba(2, 132, 199, 0.25);
+  }
+  .dica b,
+  .dica p {
+    color: var(--text);
+  }
+
+  /* Podium */
+  .podium {
+    grid-template-columns: repeat(3, 1fr);
+  }
+  @media (max-width: 720px) {
+    .podium {
+      grid-template-columns: 1fr;
+    }
+  }
+  .pod {
+    position: relative;
+    overflow: hidden;
+    text-align: center;
+    padding: 22px 18px;
+    cursor: pointer;
+    transition: transform 0.16s;
+  }
+  .pod:hover {
+    transform: translateY(-4px);
+  }
+  .pod .medal {
+    width: 46px;
+    height: 46px;
+    margin: 0 auto;
+    border-radius: 14px;
+    display: grid;
+    place-items: center;
+    background: var(--surface-2);
+  }
+  .pod .medal svg {
+    width: 24px;
+    height: 24px;
+  }
+  .pod .place {
+    font-size: 12px;
+    font-weight: 700;
+    margin-top: 8px;
+  }
+  .pod .pod-name {
+    font-size: 17px;
+    font-weight: 800;
+    margin-top: 8px;
+  }
+  .pod .pod-val {
+    font-size: 22px;
+    font-weight: 800;
+    margin-top: 8px;
+  }
+  .g1 {
+    color: #eab308;
+  }
+  .g2 {
+    color: #94a3b8;
+  }
+  .g3 {
+    color: #d97706;
+  }
+
+  /* Empty */
+  .empty {
+    text-align: center;
+    padding: 52px 20px;
+  }
+  .empty .e-ico {
+    width: 56px;
+    height: 56px;
+    margin: 0 auto 14px;
+    border-radius: 16px;
+    background: var(--surface-2);
+    color: var(--muted);
+    display: grid;
+    place-items: center;
+  }
+  .empty .e-ico svg {
+    width: 26px;
+    height: 26px;
+  }
+  .empty h3 {
+    font-size: 15px;
+  }
+  .empty p {
+    margin: 6px auto 0;
+    max-width: 340px;
+    font-size: 13px;
+    color: var(--muted);
+  }
+
+  /* Modal */
+  .modal-back {
+    position: fixed;
+    inset: 0;
+    z-index: 50;
+    background: rgba(4, 4, 10, 0.66);
+    backdrop-filter: blur(4px);
+    display: flex;
+    align-items: flex-start;
+    justify-content: center;
+    padding: 24px 16px;
+    overflow-y: auto;
+  }
+  .modal {
+    width: 100%;
+    max-width: 620px;
+    margin: 24px 0;
+    border-radius: 18px;
+    border: 1px solid var(--border);
+    background: var(--card-solid);
+    box-shadow: 0 30px 70px -20px rgba(0, 0, 0, 0.6);
+    animation: pop 0.2s ease-out;
+  }
+  .modal.sm {
+    max-width: 440px;
+  }
+  @keyframes pop {
+    from {
+      opacity: 0;
+      transform: translateY(10px) scale(0.98);
+    }
+  }
+  .modal-head {
+    position: relative;
+    padding: 20px 22px;
+    border-bottom: 1px solid var(--border-soft);
+  }
+  .modal-head h2 {
+    font-size: 18px;
+    font-weight: 700;
+  }
+  .modal-head p {
+    margin: 4px 0 0;
+    font-size: 13px;
+    color: var(--muted);
+  }
+  .modal-x {
+    position: absolute;
+    right: 16px;
+    top: 16px;
+  }
+  .modal-body {
+    padding: 20px 22px;
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    max-height: 66vh;
+    overflow-y: auto;
+  }
+  .modal-foot {
+    padding: 15px 22px;
+    border-top: 1px solid var(--border-soft);
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+  }
+  .form-row {
+    display: grid;
+    gap: 14px;
+  }
+  .form-row.c2 {
+    grid-template-columns: 1fr 1fr;
+  }
+  .form-row.c3 {
+    grid-template-columns: 1fr 1fr 1fr;
+  }
+  @media (max-width: 520px) {
+    .form-row.c2,
+    .form-row.c3 {
+      grid-template-columns: 1fr;
+    }
+  }
+  .hint-box {
+    border-radius: 12px;
+    padding: 13px;
+    font-size: 12px;
+    color: var(--muted);
+  }
+  .hint-box.v {
+    border: 1px solid color-mix(in srgb, var(--accent) 25%, transparent);
+    background: var(--accent-soft);
+  }
+  .hint-box.s {
+    border: 1px solid rgba(2, 132, 199, 0.25);
+    background: rgba(2, 132, 199, 0.08);
+  }
+  .hint-box.f {
+    border: 1px solid rgba(217, 70, 239, 0.25);
+    background: rgba(217, 70, 239, 0.08);
+  }
+  .readonly-val {
+    display: flex;
+    align-items: center;
+    height: 40px;
+    padding: 0 12px;
+    border-radius: 10px;
+    border: 1px solid var(--border);
+    background: var(--surface-2);
+    font-weight: 700;
+  }
+  .dep-list {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 8px;
+  }
+  @media (max-width: 520px) {
+    .dep-list {
+      grid-template-columns: repeat(2, 1fr);
+    }
+  }
+  .dep-item {
+    display: flex;
+    gap: 4px;
+    align-items: center;
+  }
+  .dep-item .input {
+    height: 36px;
+  }
+  .box {
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    background: var(--surface-2);
+    padding: 14px;
+  }
+  .lucro-preview {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    background: var(--surface-2);
+    padding: 13px 15px;
+  }
+  .lucro-preview .big {
+    font-size: 20px;
+    font-weight: 800;
+  }
+  .form-err {
+    border: 1px solid color-mix(in srgb, var(--danger) 40%, transparent);
+    background: var(--danger-soft);
+    color: var(--danger);
+    border-radius: 10px;
+    padding: 9px 12px;
+    font-size: 13px;
+  }
+
+  /* Model chooser cards */
+  .model-pick {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 8px;
+  }
+  @media (max-width: 480px) {
+    .model-pick {
+      grid-template-columns: 1fr;
+    }
+  }
+  .model-opt {
+    border: 1.5px solid var(--border);
+    border-radius: 13px;
+    padding: 13px 10px;
+    background: var(--card-solid);
+    text-align: center;
+    transition: border-color 0.15s, background 0.15s, transform 0.12s;
+  }
+  .model-opt:hover {
+    border-color: color-mix(in srgb, var(--accent) 45%, transparent);
+  }
+  .model-opt:active {
+    transform: scale(0.98);
+  }
+  .model-opt.active {
+    border-color: var(--accent);
+    background: var(--accent-soft);
+  }
+  .model-opt .mo-ico {
+    display: inline-grid;
+    place-items: center;
+    width: 34px;
+    height: 34px;
+    border-radius: 10px;
+    background: var(--surface-2);
+    color: var(--muted);
+  }
+  .model-opt.active .mo-ico {
+    background: color-mix(in srgb, var(--accent) 18%, transparent);
+    color: var(--accent);
+  }
+  .model-opt .mo-ico svg {
+    width: 17px;
+    height: 17px;
+  }
+  .model-opt .mo-t {
+    font-weight: 600;
+    font-size: 13px;
+    margin-top: 7px;
+  }
+  .model-opt .mo-d {
+    font-size: 11px;
+    color: var(--muted);
+    margin-top: 2px;
+    line-height: 1.35;
+  }
+  .model-opt.active .mo-t {
+    color: var(--accent);
+  }
+
+  /* Pills (status) */
+  .pill-group {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 7px;
+  }
+  .pill {
+    border: 1.5px solid var(--border);
+    border-radius: 999px;
+    padding: 7px 15px;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--muted);
+    background: transparent;
+    transition: all 0.14s;
+  }
+  .pill:hover {
+    color: var(--text);
+  }
+  .pill.active {
+    border-color: var(--accent);
+    background: var(--accent-soft);
+    color: var(--accent);
+  }
+  /* Chips de valor rápido de depósito */
+  .chip-adds {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+  .chip-add {
+    border: 1.5px solid color-mix(in srgb, var(--accent) 35%, transparent);
+    background: var(--accent-soft);
+    color: var(--accent);
+    border-radius: 11px;
+    padding: 9px 14px;
+    font-size: 14px;
+    font-weight: 700;
+    transition: transform 0.1s, filter 0.12s;
+  }
+  .chip-add:hover {
+    filter: brightness(1.08);
+  }
+  .chip-add:active {
+    transform: scale(0.94);
+  }
+  .dep-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    border: 1px solid var(--border);
+    background: var(--surface-2);
+    border-radius: 999px;
+    padding: 6px 8px 6px 13px;
+    font-size: 13px;
+    font-weight: 600;
+    font-variant-numeric: tabular-nums;
+  }
+  .dep-chip button {
+    display: inline-grid;
+    place-items: center;
+    width: 18px;
+    height: 18px;
+    border: none;
+    border-radius: 999px;
+    background: transparent;
+    color: var(--muted);
+  }
+  .dep-chip button:hover {
+    background: var(--danger-soft);
+    color: var(--danger);
+  }
+  .dep-chip button svg {
+    width: 12px;
+    height: 12px;
+  }
+  .deal-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+  }
+  @media (max-width: 480px) {
+    .deal-grid {
+      grid-template-columns: 1fr;
+    }
+  }
+  .form-ok {
+    border: 1px solid color-mix(in srgb, var(--success) 40%, transparent);
+    background: var(--success-soft);
+    color: var(--success);
+    border-radius: 10px;
+    padding: 9px 12px;
+    font-size: 13px;
+    display: flex;
+    gap: 8px;
+    align-items: center;
+  }
+
+  /* Banner exemplo */
+  .banner {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    align-items: center;
+    justify-content: space-between;
+    border: 1px dashed color-mix(in srgb, var(--accent) 40%, transparent);
+    background: var(--accent-soft);
+    border-radius: 12px;
+    padding: 11px 15px;
+    margin-bottom: 18px;
+    font-size: 13px;
+  }
+  .banner b {
+    color: var(--accent);
+  }
+
+  .sync-tag {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 12px;
+    font-weight: 600;
+    padding: 5px 11px;
+    border-radius: 999px;
+    border: 1px solid;
+  }
+  .sync-tag svg {
+    width: 13px;
+    height: 13px;
+  }
+  .sync-tag.ok {
+    color: var(--success);
+    background: var(--success-soft);
+    border-color: color-mix(in srgb, var(--success) 30%, transparent);
+  }
+  .sync-tag.warn2 {
+    color: var(--warning);
+    background: var(--warning-soft);
+    border-color: color-mix(in srgb, var(--warning) 30%, transparent);
+  }
+
+  /* Chart */
+  .chart {
+    width: 100%;
+    position: relative;
+  }
+  .chart svg {
+    width: 100%;
+    display: block;
+    overflow: visible;
+  }
+  .hoverband {
+    fill: transparent;
+    cursor: pointer;
+  }
+  .chart-tip {
+    position: fixed;
+    z-index: 60;
+    pointer-events: none;
+    background: var(--card-solid);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 8px 11px;
+    box-shadow: 0 12px 30px -10px rgba(0, 0, 0, 0.5);
+    font-size: 12px;
+    opacity: 0;
+    transition: opacity 0.12s;
+    white-space: nowrap;
+  }
+  .chart-tip .t-lbl {
+    color: var(--muted);
+    margin-bottom: 3px;
+  }
+  .chart-tip .t-val {
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .chart-tip .swatch {
+    width: 9px;
+    height: 9px;
+    border-radius: 999px;
+  }
+
+  .timeline {
+    position: relative;
+    padding-left: 18px;
+  }
+  .timeline::before {
+    content: '';
+    position: absolute;
+    left: 3px;
+    top: 8px;
+    bottom: 8px;
+    width: 1px;
+    background: var(--border);
+  }
+  .tl-item {
+    position: relative;
+    padding: 9px 0;
+  }
+  .tl-item::before {
+    content: '';
+    position: absolute;
+    left: -18px;
+    top: 15px;
+    width: 8px;
+    height: 8px;
+    border-radius: 999px;
+    background: var(--accent);
+    box-shadow: 0 0 0 4px var(--bg);
+  }
+  .tl-item .tl-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 10px;
+  }
+  .strike {
+    text-decoration: line-through;
+    color: var(--muted);
+  }
+  .back-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: none;
+    border: none;
+    color: var(--muted);
+    font-size: 13px;
+    font-weight: 500;
+    padding: 0;
+    margin-bottom: 14px;
+  }
+  .back-link:hover {
+    color: var(--text);
+  }
+  .back-link svg {
+    width: 16px;
+    height: 16px;
+  }
+  .avatar {
+    width: 56px;
+    height: 56px;
+    border-radius: 16px;
+    display: grid;
+    place-items: center;
+    font-size: 22px;
+    font-weight: 800;
+    color: #fff;
+    background: linear-gradient(135deg, var(--accent), var(--accent-2));
+    flex: none;
+  }
+  .chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    align-items: center;
+  }
+  .view {
+    animation: fade 0.28s ease-out;
+  }
+  @keyframes fade {
+    from {
+      opacity: 0;
+      transform: translateY(6px);
+    }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    * {
+      animation: none !important;
+      transition: none !important;
+    }
+  }
+  :focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 2px;
+  }
+</style>
+
+<div class="app">
+  <aside class="sidebar">
+    <div class="brand">
+      <div class="brand-logo">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9.937 15.5A2 2 0 0 0 8.5 14.063l-6.135-1.582a.5.5 0 0 1 0-.962L8.5 9.936A2 2 0 0 0 9.937 8.5l1.582-6.135a.5.5 0 0 1 .962 0L14.063 8.5A2 2 0 0 0 15.5 9.937l6.135 1.581a.5.5 0 0 1 0 .964L15.5 14.063a2 2 0 0 0-1.437 1.437l-1.582 6.135a.5.5 0 0 1-.962 0z"/></svg>
+      </div>
+      <div>
+        <b>Controle iGaming</b>
+        <span>Gestão de influenciadores</span>
+      </div>
+    </div>
+    <nav class="nav" id="nav"></nav>
+    <button class="theme-toggle" id="themeToggle">
+      <svg id="themeIco" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></svg>
+      <span id="themeLbl"></span>
+    </button>
+    <div class="side-tip">
+      <b>Dica.</b> Ajuste sua participação global em Configurações. Lançamentos antigos mantêm o percentual da época.
+    </div>
+  </aside>
+
+  <main id="main"></main>
+</div>
+<nav class="mobilenav" id="mobilenav"></nav>
+<div class="chart-tip" id="chartTip"></div>
+<div id="modalRoot"></div>
+
+<script>
+  'use strict';
+  /* ============================================================
+     Ícones (lucide, inline)
+  ============================================================ */
+  const I = {
+    dashboard: '<path d="M3 3h7v9H3zM14 3h7v5h-7zM14 12h7v9h-7zM3 16h7v5H3z"/>',
+    users: '<path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/>',
+    trophy: '<path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6M18 9h1.5a2.5 2.5 0 0 0 0-5H18M4 22h16M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22M18 2H6v7a6 6 0 0 0 12 0z"/>',
+    settings: '<path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"/><circle cx="12" cy="12" r="3"/>',
+    plus: '<path d="M5 12h14M12 5v14"/>',
+    search: '<circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/>',
+    wallet: '<path d="M19 7V4a1 1 0 0 0-1-1H5a2 2 0 0 0 0 4h15a1 1 0 0 1 1 1v4h-3a2 2 0 0 0 0 4h3a1 1 0 0 0 1-1v-2a1 1 0 0 0-1-1"/><path d="M3 5v14a2 2 0 0 0 2 2h15a1 1 0 0 0 1-1v-4"/>',
+    dollar: '<line x1="12" y1="2" x2="12" y2="22"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>',
+    trendUp: '<polyline points="22 7 13.5 15.5 8.5 10.5 2 17"/><polyline points="16 7 22 7 22 13"/>',
+    trendDown: '<polyline points="22 17 13.5 8.5 8.5 13.5 2 7"/><polyline points="16 17 22 17 22 11"/>',
+    receipt: '<path d="M4 2v20l2-1 2 1 2-1 2 1 2-1 2 1 2-1 2 1V2l-2 1-2-1-2 1-2-1-2 1-2-1-2 1Z"/><path d="M16 8h-6a2 2 0 1 0 0 4h4a2 2 0 1 1 0 4H8"/>',
+    coins: '<circle cx="8" cy="8" r="6"/><path d="M18.09 10.37A6 6 0 1 1 10.34 18M7 6h1v4M16.71 13.88l.7.71-2.82 2.82"/>',
+    target: '<circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/>',
+    calendar: '<rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/>',
+    film: '<rect x="2" y="3" width="20" height="18" rx="2"/><path d="M7 3v18M17 3v18M2 9h5M2 15h5M17 9h5M17 15h5"/>',
+    bulb: '<path d="M15 14c.2-1 .7-1.7 1.5-2.5 1-.9 1.5-2.2 1.5-3.5A6 6 0 0 0 6 8c0 1 .2 2.2 1.5 3.5.7.7 1.3 1.5 1.5 2.5M9 18h6M10 22h4"/>',
+    check: '<path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/>',
+    x: '<circle cx="12" cy="12" r="10"/><path d="m15 9-6 6M9 9l6 6"/>',
+    alert: '<path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/>',
+    info: '<circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/>',
+    close: '<path d="M18 6 6 18M6 6l12 12"/>',
+    pencil: '<path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z"/>',
+    trash: '<path d="M3 6h18M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>',
+    arrowRight: '<path d="M5 12h14M12 5l7 7-7 7"/>',
+    arrowLeft: '<path d="M19 12H5M12 19l-7-7 7-7"/>',
+    crown: '<path d="M11.562 3.266a.5.5 0 0 1 .876 0L15.39 8.87a1 1 0 0 0 1.516.294L21.183 5.5a.5.5 0 0 1 .798.519l-2.834 10.246a1 1 0 0 1-.956.734H5.81a1 1 0 0 1-.957-.734L2.02 6.02a.5.5 0 0 1 .798-.519l4.276 3.664a1 1 0 0 0 1.516-.294z"/><path d="M5 21h14"/>',
+    medal: '<path d="M7.21 15 2.66 7.14a2 2 0 0 1 .13-2.2L4.4 2.8A2 2 0 0 1 6 2h12a2 2 0 0 1 1.6.8l1.6 2.14a2 2 0 0 1 .14 2.2L16.79 15"/><circle cx="12" cy="17" r="5"/><path d="M12 18v-2h-.5"/>',
+    award: '<circle cx="12" cy="8" r="6"/><path d="M15.477 12.89 17 22l-5-3-5 3 1.523-9.11"/>',
+    percent: '<line x1="19" y1="5" x2="5" y2="19"/><circle cx="6.5" cy="6.5" r="2.5"/><circle cx="17.5" cy="17.5" r="2.5"/>',
+    save: '<path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/>',
+    history: '<path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5M12 7v5l4 2"/>',
+    inbox: '<polyline points="22 12 16 12 14 15 10 15 8 12 2 12"/><path d="M5.45 5.11 2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11z"/>',
+    sun: '<circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"/>',
+    moon: '<path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/>',
+  };
+  const svg = (name, cls = '') =>
+    `<svg class="${cls}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">${I[name] || ''}</svg>`;
+
+  /* ============================================================
+     Formatação pt-BR
+  ============================================================ */
+  const _brl = new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' });
+  const _brlC = new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL', notation: 'compact', maximumFractionDigits: 1 });
+  const fmtBRL = (v) => _brl.format(Number(v) || 0);
+  const fmtBRLc = (v) => _brlC.format(Number(v) || 0);
+  const fmtNum = (v) => new Intl.NumberFormat('pt-BR').format(Number(v) || 0);
+  const fmtPct = (v, c = 1) => (v == null || isNaN(v) ? '—' : new Intl.NumberFormat('pt-BR', { maximumFractionDigits: c }).format(Number(v)) + '%');
+  const fmtData = (iso) => {
+    if (!iso) return '—';
+    const d = new Date(iso.length <= 10 ? iso + 'T00:00:00' : iso);
+    return isNaN(d) ? '—' : d.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit', year: 'numeric' });
+  };
+  const fmtDataCurta = (iso) => {
+    const d = new Date(iso + 'T00:00:00');
+    return isNaN(d) ? '—' : d.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' });
+  };
+  const round2 = (n) => Math.round((Number(n) || 0) * 100) / 100;
+  const hojeISO = () => {
+    const d = new Date();
+    return new Date(d.getTime() - d.getTimezoneOffset() * 60000).toISOString().slice(0, 10);
+  };
+  const addDias = (iso, n) => {
+    const d = new Date(iso + 'T00:00:00');
+    d.setDate(d.getDate() + n);
+    return new Date(d.getTime() - d.getTimezoneOffset() * 60000).toISOString().slice(0, 10);
+  };
+  const esc = (s) => String(s == null ? '' : s).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+
+  /* ============================================================
+     Store (localStorage)
+  ============================================================ */
+  const KEY = 'controle-igaming-v1';
+  let db = null;
+
+  function seed() {
+    const iso = (d) => addDias(hojeISO(), -d);
+    const infs = [
+      { nome: 'Ana Souza', instagram: '@anasouza', status: 'fechado', dataInicio: iso(90), modeloPagamento: 'percentual', percentualComissao: 50, observacoes: 'Alta conversão em apostas esportivas.' },
+      { nome: 'Bruno Lima', instagram: '@brunolima', status: 'fechado', dataInicio: iso(60), modeloPagamento: 'stories', valorPorStory: 120, qtdStoriesPadrao: 3, diasDivulgacao: 7, observacoes: 'Foco em stories diários.' },
+      { nome: 'Carla Mendes', instagram: '@carlamendes', status: 'fechado', dataInicio: iso(120), modeloPagamento: 'fixo', valorFixo: 1500, recorrencia: 'mensal', observacoes: 'Contrato mensal fixo.' },
+      { nome: 'Diego Rocha', instagram: '@diegorocha', status: 'pausado', dataInicio: iso(150), modeloPagamento: 'percentual', percentualComissao: 60, observacoes: 'Performance caiu, parceria pausada.' },
+      { nome: 'Elisa Faria', instagram: '@elisafaria', status: 'negociando', dataInicio: iso(10), modeloPagamento: 'stories', valorPorStory: 90, qtdStoriesPadrao: 2, diasDivulgacao: 5, observacoes: 'Em fase de teste.' },
+    ];
+    const now = new Date().toISOString();
+    db = { config: { minhaParticipacao: 80, atualizadoEm: now }, configHistorico: [], influenciadores: [], lancamentos: [], seq: 1, exemplo: true, updatedAt: 0, presetsDeposito: [20, 30, 40, 50, 70, 100] };
+    const rand = (a, b) => Math.round(a + Math.random() * (b - a));
+    infs.forEach((inf) => {
+      const id = db.seq++;
+      db.influenciadores.push({ id, criadoEm: now, percentualComissao: null, valorFixo: null, recorrencia: null, valorPorStory: null, qtdStoriesPadrao: null, diasDivulgacao: null, ...inf });
+      const n = rand(6, 11);
+      for (let i = 0; i < n; i++) {
+        const depositos = Array.from({ length: rand(0, 4) }, () => rand(60, 700));
+        const receitaBruta = depositos.reduce((a, b) => a + b, 0) * (1 + Math.random());
+        const input = { depositos, receitaBruta, percentualAplicado: 80, gastosExtras: Math.random() > 0.7 ? rand(20, 120) : 0 };
+        if (inf.modeloPagamento === 'stories') {
+          input.quantidadeStories = rand(1, 5);
+          input.valorCobrado = input.quantidadeStories * rand(80, 180);
+        }
+        const c = calcLanc(input, db.influenciadores[db.influenciadores.length - 1]);
+        db.lancamentos.push({
+          id: db.seq++, influenciadorId: id, data: iso(rand(0, 42)), cadastros: rand(0, 35),
+          depositos, receitaBruta: c.receitaBruta, percentualAplicado: c.percentualAplicado,
+          receitaLiquida: c.receitaLiquida, gastosExtras: c.gastosExtras, valorPago: c.valorPago, lucro: c.lucro,
+          quantidadeStories: c.quantidadeStories, valorCobrado: c.valorCobrado, observacoes: null, criadoEm: now,
+        });
+      }
+    });
+  }
+
+  function load() {
+    try {
+      const raw = localStorage.getItem(KEY);
+      if (raw) {
+        db = JSON.parse(raw);
+        // Dados já existentes no navegador são tratados como reais (para não
+        // serem sobrescritos por um dispositivo recém-aberto com exemplos).
+        if (db.updatedAt == null) db.updatedAt = Date.now();
+        normalize();
+        return;
+      }
+    } catch (e) {}
+    seed();
+    normalize();
+    persistLocal();
+  }
+  function normalize() {
+    if (!db) return;
+    if (!Array.isArray(db.presetsDeposito) || !db.presetsDeposito.length) db.presetsDeposito = [20, 30, 40, 50, 70, 100];
+    if (!Array.isArray(db.lancamentos)) return;
+    db.lancamentos.forEach((l) => { if (l.lucro == null || isNaN(l.lucro)) l.lucro = lucroLanc(l); });
+  }
+  const presetsDep = () => (Array.isArray(db.presetsDeposito) && db.presetsDeposito.length ? db.presetsDeposito : [20, 30, 40, 50, 70, 100]);
+  function persistLocal() {
+    try { localStorage.setItem(KEY, JSON.stringify(db)); } catch (e) {}
+  }
+  function save() {
+    db.updatedAt = Date.now();
+    persistLocal();
+    scheduleCloudWrite();
+  }
+
+  /* ============================================================
+     Sincronização com a conta (capability db) — salva na nuvem e
+     acompanha entre dispositivos. localStorage segue como cache offline.
+  ============================================================ */
+  const SYNC = { on: false, ready: false };
+  let cloudRef = null;
+  let writeTimer = null, writing = false, pendingWrite = false, remoteStash = null;
+
+  function scheduleCloudWrite() {
+    if (!cloudRef) return;
+    pendingWrite = true;
+    if (writeTimer) return;
+    writeTimer = setTimeout(flushCloudWrite, 500);
+  }
+  async function flushCloudWrite() {
+    writeTimer = null;
+    if (writing || !pendingWrite || !cloudRef) return;
+    pendingWrite = false;
+    writing = true;
+    try {
+      await cloudRef.set(JSON.parse(JSON.stringify(db)));
+    } catch (e) {
+      // falha transitória: mantém no cache local e tenta de novo depois
+      pendingWrite = true;
+    } finally {
+      writing = false;
+      if (pendingWrite) scheduleCloudWrite();
+    }
+  }
+
+  function adotarRemoto(remoto) {
+    // Aplica um estado vindo da nuvem sobre o local, sem re-gravar.
+    db = remoto;
+    if (db.updatedAt == null) db.updatedAt = Date.now();
+    normalize();
+    persistLocal();
+    if (modalRoot.children.length) { remoteStash = null; return; } // não interromper edição em modal
+    router();
+  }
+
+  function reconciliar(remoto) {
+    const rUp = remoto && typeof remoto.updatedAt === 'number' ? remoto.updatedAt : -1;
+    const lUp = typeof db.updatedAt === 'number' ? db.updatedAt : 0;
+    if (remoto && rUp > lUp) {
+      // Nuvem mais recente → adota (se um modal estiver aberto, guarda p/ depois)
+      if (modalRoot.children.length) remoteStash = remoto;
+      else adotarRemoto(remoto);
+    } else if (lUp > 0 && rUp < lUp) {
+      // Local real e mais novo (inclui nuvem vazia) → envia p/ nuvem
+      scheduleCloudWrite();
+    }
+  }
+
+  async function initCloud() {
+    let dbCap = null;
+    try {
+      const c = window.claude;
+      dbCap = c && typeof c.use === 'function' ? await c.use('db') : null;
+    } catch (e) { dbCap = null; }
+    if (!dbCap) { updateSyncUI(); return; } // sem conta/preview → só local
+    try {
+      cloudRef = dbCap.doc('estado/app');
+      const snap = await cloudRef.get();
+      reconciliar(snap.exists ? snap.data() : null);
+      SYNC.on = true;
+      SYNC.ready = true;
+      updateSyncUI();
+      // Escuta mudanças de outros dispositivos.
+      cloudRef.onSnapshot((s) => {
+        if (!s.exists) return;
+        const remoto = s.data();
+        if (typeof remoto.updatedAt === 'number' && remoto.updatedAt > (db.updatedAt || 0)) {
+          if (modalRoot.children.length) remoteStash = remoto;
+          else adotarRemoto(remoto);
+        }
+      }, () => {});
+    } catch (e) {
+      cloudRef = null;
+      updateSyncUI();
+    }
+  }
+
+  function updateSyncUI() {
+    document.querySelectorAll('[data-sync]').forEach((el) => {
+      el.innerHTML = SYNC.on
+        ? `${svg('check')} Sincronizado com sua conta`
+        : `${svg('info')} Salvando só neste navegador`;
+      el.className = 'sync-tag ' + (SYNC.on ? 'ok' : 'warn2');
+    });
+  }
+
+  /* ============================================================
+     Regras de cálculo (idêntico ao back-end original)
+  ============================================================ */
+  const somaDep = (d) => round2((d || []).reduce((a, v) => a + (Number(v) || 0), 0));
+  const lucroLanc = (l) => round2((l.receitaLiquida || 0) - (l.valorPago || 0) - (l.gastosExtras || 0));
+
+  function calcLanc(input, inf) {
+    const receitaBruta = Number(input.receitaBruta) || 0;
+    const pct = Number(input.percentualAplicado) || 0;
+    const gastos = Number(input.gastosExtras) || 0;
+    const dep = (input.depositos || []).map((v) => Number(v) || 0);
+    const total = somaDep(dep);
+    const receitaLiquida = round2((receitaBruta * pct) / 100);
+    let valorPago = 0, qStories = null, vCobrado = null;
+    if (inf.modeloPagamento === 'stories') {
+      qStories = Number(input.quantidadeStories) || 0;
+      vCobrado = Number(input.valorCobrado) || 0;
+      valorPago = round2(vCobrado);
+    } else if (inf.modeloPagamento === 'fixo') {
+      valorPago = input.valorPago != null && input.valorPago !== '' ? round2(Number(input.valorPago)) : round2(Number(inf.valorFixo) || 0);
+    } else if (inf.modeloPagamento === 'percentual') {
+      const c = Number(inf.percentualComissao) || 0;
+      valorPago = input.valorPago != null && input.valorPago !== '' ? round2(Number(input.valorPago)) : round2((total * c) / 100);
+    }
+    return {
+      receitaBruta: round2(receitaBruta), percentualAplicado: pct, receitaLiquida, gastosExtras: round2(gastos),
+      valorPago, lucro: round2(receitaLiquida - valorPago - gastos), totalDepositos: total,
+      quantidadeStories: qStories, valorCobrado: vCobrado != null ? round2(vCobrado) : null,
+    };
+  }
+
+  const lancsDe = (id) => db.lancamentos.filter((l) => l.influenciadorId === id).sort((a, b) => a.data.localeCompare(b.data));
+
+  function metricas(lancs) {
+    const a = { receitaBrutaTotal: 0, receitaLiquidaTotal: 0, totalPago: 0, gastosExtrasTotal: 0, lucro: 0, cadastrosTotais: 0, depositosTotais: 0, totalStories: 0, qtdLancamentos: lancs.length };
+    lancs.forEach((l) => {
+      a.receitaBrutaTotal += l.receitaBruta; a.receitaLiquidaTotal += l.receitaLiquida; a.totalPago += l.valorPago;
+      a.gastosExtrasTotal += l.gastosExtras; a.lucro += l.lucro; a.cadastrosTotais += l.cadastros;
+      a.depositosTotais += somaDep(l.depositos); if (l.quantidadeStories) a.totalStories += l.quantidadeStories;
+    });
+    Object.keys(a).forEach((k) => (a[k] = round2(a[k])));
+    const invest = a.totalPago + a.gastosExtrasTotal;
+    a.roi = invest > 0 ? round2((a.lucro / invest) * 100) : null;
+    a.custoPorCadastro = a.cadastrosTotais > 0 ? round2(invest / a.cadastrosTotais) : null;
+    a.custoMedioPorStory = a.totalStories > 0 ? round2(a.totalPago / a.totalStories) : null;
+    return a;
+  }
+
+  function custoCadastroMedioAgencia() {
+    let invest = 0, cad = 0;
+    db.lancamentos.forEach((l) => { invest += l.valorPago + l.gastosExtras; cad += l.cadastros; });
+    return cad > 0 ? round2(invest / cad) : null;
+  }
+
+  function gerarDicas(lancs, m) {
+    const dicas = [];
+    const push = (tipo, titulo, texto) => dicas.push({ tipo, titulo, texto });
+    if (lancs.length === 0) { push('info', 'Sem lançamentos', 'Cadastre lançamentos para gerar análises e recomendações.'); return dicas; }
+    const ord = [...lancs].sort((a, b) => a.data.localeCompare(b.data));
+    const u3 = ord.slice(-3);
+    if (u3.length === 3 && u3.every((l) => l.lucro < 0)) push('perigo', 'Prejuízo consistente', 'Os últimos 3 lançamentos fecharam no prejuízo. Reavalie o modelo de pagamento ou a performance da divulgação.');
+    else if (m.lucro < 0) push('perigo', 'Parceria no vermelho', `Lucro acumulado negativo (${fmtBRL(m.lucro)}). Essa parceria precisa de atenção.`);
+    if (m.roi != null && m.roi >= 100) push('sucesso', 'ROI acima de 100%', `ROI de ${m.roi}%. Excelente retorno — considere aumentar o investimento nesse influenciador.`);
+    else if (m.roi != null && m.roi < 0) push('perigo', 'ROI negativo', `ROI de ${m.roi}%. Você está gastando mais do que retorna.`);
+    const media = custoCadastroMedioAgencia();
+    if (m.custoPorCadastro != null && media && m.custoPorCadastro > media) {
+      const pct = round2(((m.custoPorCadastro - media) / media) * 100);
+      if (pct >= 20) push('alerta', 'Custo por cadastro elevado', `Custo por cadastro ${pct}% acima da média geral da agência (${fmtBRL(m.custoPorCadastro)} vs ${fmtBRL(media)}).`);
+    }
+    const ultima = new Date(ord[ord.length - 1].data + 'T00:00:00');
+    const dias = Math.floor((new Date(hojeISO() + 'T00:00:00') - ultima) / 86400000);
+    if (dias > 14) push('alerta', 'Parceria parada', `Sem lançamentos há ${dias} dias. Verifique se a divulgação continua ativa.`);
+    if (u3.length === 3 && u3.every((l) => l.lucro > 0)) push('sucesso', 'Tendência positiva', 'Os últimos 3 lançamentos foram lucrativos. Boa consistência!');
+    if (dicas.length === 0) push('info', 'Tudo estável', 'Nenhum alerta relevante no momento. Performance dentro do esperado.');
+    return dicas;
+  }
+
+  const STATUS_LBL = { negociando: 'Negociando', fechado: 'Fechado', pausado: 'Pausado' };
+  const MOD_LBL = { stories: 'Stories', fixo: 'Fixo', percentual: 'Percentual' };
+  const statusBadge = (s) => `<span class="badge st-${s}"><span class="dot"></span>${STATUS_LBL[s] || s}</span>`;
+  const modBadge = (m) => `<span class="badge mod-${m}">${MOD_LBL[m] || m}</span>`;
+
+  /* ============================================================
+     Gráficos SVG
+  ============================================================ */
+  const tip = document.getElementById('chartTip');
+  function showTip(x, y, label, value, color) {
+    tip.innerHTML = `<div class="t-lbl">${esc(label)}</div><div class="t-val"><span class="swatch" style="background:${color}"></span>${esc(value)}</div>`;
+    tip.style.opacity = '1';
+    const r = tip.getBoundingClientRect();
+    let left = x - r.width / 2;
+    left = Math.max(8, Math.min(left, window.innerWidth - r.width - 8));
+    tip.style.left = left + 'px';
+    tip.style.top = y - r.height - 12 + 'px';
+  }
+  const hideTip = () => (tip.style.opacity = '0');
+
+  function lineChart(el, data) {
+    // data: [{data, lucro}]
+    const W = 720, H = 260, pl = 52, pr = 14, pt = 14, pb = 30;
+    const iw = W - pl - pr, ih = H - pt - pb;
+    const vals = data.map((d) => d.lucro);
+    let min = Math.min(0, ...vals), max = Math.max(0, ...vals);
+    if (min === max) max = min + 1;
+    const pad = (max - min) * 0.1;
+    max += pad; min -= min < 0 ? pad : 0;
+    const X = (i) => pl + (data.length <= 1 ? iw / 2 : (i / (data.length - 1)) * iw);
+    const Y = (v) => pt + ih - ((v - min) / (max - min)) * ih;
+    const line = data.map((d, i) => `${i === 0 ? 'M' : 'L'}${X(i).toFixed(1)},${Y(d.lucro).toFixed(1)}`).join(' ');
+    const area = `${line} L${X(data.length - 1).toFixed(1)},${Y(min).toFixed(1)} L${X(0).toFixed(1)},${Y(min).toFixed(1)} Z`;
+    const accent = getVar('--accent');
+    // gridlines + labels Y (4)
+    let grid = '';
+    for (let g = 0; g <= 4; g++) {
+      const v = min + ((max - min) * g) / 4;
+      const y = Y(v);
+      grid += `<line x1="${pl}" y1="${y.toFixed(1)}" x2="${W - pr}" y2="${y.toFixed(1)}" stroke="${getVar('--border')}" stroke-dasharray="3 3"/>`;
+      grid += `<text x="${pl - 8}" y="${(y + 4).toFixed(1)}" text-anchor="end" font-size="11" fill="${getVar('--muted')}">${fmtBRLc(v)}</text>`;
+    }
+    // x labels (até 6)
+    let xlab = '';
+    const step = Math.max(1, Math.ceil(data.length / 6));
+    data.forEach((d, i) => {
+      if (i % step === 0 || i === data.length - 1) {
+        xlab += `<text x="${X(i).toFixed(1)}" y="${H - 8}" text-anchor="middle" font-size="11" fill="${getVar('--muted')}">${fmtDataCurta(d.data)}</text>`;
+      }
+    });
+    const dots = data.map((d, i) => `<circle cx="${X(i).toFixed(1)}" cy="${Y(d.lucro).toFixed(1)}" r="3" fill="${accent}"/>`).join('');
+    const bands = data.map((d, i) => {
+      const bw = data.length <= 1 ? iw : iw / (data.length - 1);
+      return `<rect class="hoverband" x="${(X(i) - bw / 2).toFixed(1)}" y="${pt}" width="${bw.toFixed(1)}" height="${ih}" data-i="${i}"/>`;
+    }).join('');
+    el.innerHTML = `<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="Evolução do lucro">
+      <defs><linearGradient id="lg" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="${accent}" stop-opacity="0.45"/><stop offset="100%" stop-color="${accent}" stop-opacity="0"/></linearGradient></defs>
+      ${grid}<path d="${area}" fill="url(#lg)"/><path d="${line}" fill="none" stroke="${accent}" stroke-width="2.5"/>${dots}${xlab}${bands}</svg>`;
+    el.querySelectorAll('.hoverband').forEach((b) => {
+      b.addEventListener('mousemove', (e) => {
+        const d = data[+b.dataset.i];
+        showTip(e.clientX, e.clientY, fmtData(d.data), fmtBRL(d.lucro), accent);
+      });
+      b.addEventListener('mouseleave', hideTip);
+    });
+  }
+
+  function barChart(el, data) {
+    // horizontal bars: [{nome, lucro}]
+    const rows = data.slice(0, 8);
+    const W = 400, rowH = 34, pt = 6, pb = 6, pl = 4, pr = 60;
+    const H = pt + pb + rows.length * rowH;
+    const labelW = 92;
+    const iw = W - labelW - pr;
+    const max = Math.max(1, ...rows.map((r) => Math.abs(r.lucro)));
+    const accent = getVar('--accent'), danger = getVar('--danger');
+    let bars = '';
+    rows.forEach((r, i) => {
+      const y = pt + i * rowH + 6;
+      const bw = (Math.abs(r.lucro) / max) * iw;
+      const color = r.lucro < 0 ? danger : accent;
+      const nm = r.nome.length > 13 ? r.nome.slice(0, 13) + '…' : r.nome;
+      bars += `<text x="${labelW - 8}" y="${y + 15}" text-anchor="end" font-size="11.5" fill="${getVar('--text')}">${esc(nm)}</text>`;
+      bars += `<rect class="hoverband" x="${labelW}" y="${y}" width="${Math.max(bw, 3).toFixed(1)}" height="20" rx="5" fill="${color}" data-i="${i}"/>`;
+      bars += `<text x="${labelW + Math.max(bw, 3) + 6}" y="${y + 15}" font-size="11" fill="${getVar('--muted')}">${fmtBRLc(r.lucro)}</text>`;
+    });
+    el.innerHTML = `<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="Lucro por influenciador">${bars}</svg>`;
+    el.querySelectorAll('.hoverband').forEach((b) => {
+      b.addEventListener('mousemove', (e) => {
+        const r = rows[+b.dataset.i];
+        showTip(e.clientX, e.clientY, r.nome, fmtBRL(r.lucro), r.lucro < 0 ? danger : accent);
+      });
+      b.addEventListener('mouseleave', hideTip);
+    });
+  }
+  const getVar = (v) => getComputedStyle(document.documentElement).getPropertyValue(v).trim();
+
+  /* ============================================================
+     Navegação / Router
+  ============================================================ */
+  const NAV = [
+    { path: '', label: 'Dashboard', icon: 'dashboard' },
+    { path: 'influenciadores', label: 'Influenciadores', icon: 'users' },
+    { path: 'ranking', label: 'Ranking', icon: 'trophy' },
+    { path: 'config', label: 'Configurações', icon: 'settings' },
+  ];
+  function renderNav() {
+    const cur = location.hash.replace(/^#\/?/, '').split('/')[0];
+    const link = (n) => {
+      const active = cur === n.path ? 'active' : '';
+      return `<a href="#/${n.path}" class="${active}">${svg(n.icon)}<span>${n.label}</span></a>`;
+    };
+    document.getElementById('nav').innerHTML = NAV.map(link).join('');
+    document.getElementById('mobilenav').innerHTML = NAV.map(link).join('');
+  }
+
+  function router() {
+    renderNav();
+    const parts = location.hash.replace(/^#\/?/, '').split('/');
+    const main = document.getElementById('main');
+    hideTip();
+    window.scrollTo(0, 0);
+    if (parts[0] === 'influenciadores' && parts[1]) viewDetalhe(main, +parts[1]);
+    else if (parts[0] === 'influenciadores') viewInfluenciadores(main);
+    else if (parts[0] === 'ranking') viewRanking(main);
+    else if (parts[0] === 'config') viewConfig(main);
+    else viewDashboard(main);
+  }
+  const go = (p) => (location.hash = '#/' + p);
+
+  /* ============================================================
+     Header helper
+  ============================================================ */
+  const head = (title, sub, actions = '') =>
+    `<div class="page-head"><div><h1>${title}</h1><p>${sub}</p></div><div class="head-actions">${actions}</div></div>`;
+  const emptyState = (icon, title, desc, action = '') =>
+    `<div class="empty"><div class="e-ico">${svg(icon)}</div><h3>${title}</h3><p>${desc}</p>${action ? `<div style="margin-top:16px">${action}</div>` : ''}</div>`;
+
+  function trendPill(v, invert) {
+    if (v == null) return `<span class="muted">— sem base</span>`;
+    const good = invert ? v < 0 : v > 0;
+    const neutral = v === 0;
+    const cls = neutral ? '' : good ? 'up' : 'down';
+    const arrow = neutral ? '' : v > 0 ? '▲' : '▼';
+    return `<span class="trend ${cls} tnum">${arrow} ${Math.abs(v).toLocaleString('pt-BR', { maximumFractionDigits: 1 })}%</span>`;
+  }
+
+  /* ============================================================
+     VIEW: Dashboard
+  ============================================================ */
+  let dashPreset = '30d';
+  let dashCustom = { inicio: addDias(hojeISO(), -29), fim: hojeISO() };
+
+  function rangeFrom(preset) {
+    const h = hojeISO();
+    if (preset === 'hoje') return { inicio: h, fim: h };
+    if (preset === '7d') return { inicio: addDias(h, -6), fim: h };
+    if (preset === '30d') return { inicio: addDias(h, -29), fim: h };
+    if (preset === 'mes') return { inicio: h.slice(0, 8) + '01', fim: h };
+    return { inicio: dashCustom.inicio, fim: dashCustom.fim };
+  }
+  const lancsPeriodo = (ini, fim) => db.lancamentos.filter((l) => l.data >= ini && l.data <= fim);
+
+  function dashboardData() {
+    const r = rangeFrom(dashPreset);
+    const lancs = lancsPeriodo(r.inicio, r.fim);
+    const m = metricas(lancs);
+    const di = new Date(r.inicio + 'T00:00:00'), df = new Date(r.fim + 'T00:00:00');
+    const dur = Math.max(1, Math.round((df - di) / 86400000) + 1);
+    const antFim = new Date(di.getTime() - 86400000);
+    const antIni = new Date(antFim.getTime() - (dur - 1) * 86400000);
+    const iso = (d) => new Date(d.getTime() - d.getTimezoneOffset() * 60000).toISOString().slice(0, 10);
+    const mAnt = metricas(lancsPeriodo(iso(antIni), iso(antFim)));
+    const varia = (a, b) => (b === 0 ? (a === 0 ? 0 : null) : round2(((a - b) / Math.abs(b)) * 100));
+    const porDia = {};
+    lancs.forEach((l) => (porDia[l.data] = round2((porDia[l.data] || 0) + l.lucro)));
+    const serie = [];
+    for (let i = 0; i < dur; i++) { const k = iso(new Date(di.getTime() + i * 86400000)); serie.push({ data: k, lucro: porDia[k] || 0 }); }
+    const porInf = {};
+    lancs.forEach((l) => {
+      const c = (porInf[l.influenciadorId] = porInf[l.influenciadorId] || { lucro: 0, pago: 0 });
+      c.lucro = round2(c.lucro + l.lucro); c.pago = round2(c.pago + l.valorPago + l.gastosExtras);
+    });
+    const lista = Object.entries(porInf).map(([id, v]) => {
+      const inf = db.influenciadores.find((x) => x.id === +id) || {};
+      return { id: +id, nome: inf.nome || '?', instagram: inf.instagram, lucro: v.lucro, roi: v.pago > 0 ? round2((v.lucro / v.pago) * 100) : null };
+    }).sort((a, b) => b.lucro - a.lucro);
+    return {
+      m, serie, lista, prejuizos: lista.filter((x) => x.lucro < 0).sort((a, b) => a.lucro - b.lucro),
+      cards: {
+        receitaBruta: { v: m.receitaBrutaTotal, t: varia(m.receitaBrutaTotal, mAnt.receitaBrutaTotal) },
+        receitaLiquida: { v: m.receitaLiquidaTotal, t: varia(m.receitaLiquidaTotal, mAnt.receitaLiquidaTotal) },
+        totalPago: { v: m.totalPago, t: varia(m.totalPago, mAnt.totalPago) },
+        gastosExtras: { v: m.gastosExtrasTotal, t: varia(m.gastosExtrasTotal, mAnt.gastosExtrasTotal) },
+        lucro: { v: m.lucro, t: varia(m.lucro, mAnt.lucro) },
+      },
+    };
+  }
+
+  function kpi(label, val, icon, accent, trend, invert) {
+    const tone = { primary: 'var(--accent)', success: 'var(--success)', danger: 'var(--danger)', warning: 'var(--warning)', sky: 'var(--sky)' }[accent];
+    const trendHtml = trend !== undefined ? `<div class="kpi-trend">${trendPill(trend, invert)}<span>vs período anterior</span></div>` : '';
+    return `<div class="card kpi"><div class="kpi-top"><div class="kpi-label">${label}</div><div class="kpi-ico" style="background:color-mix(in srgb,${tone} 16%,transparent);color:${tone}">${svg(icon)}</div></div><div class="kpi-val tnum">${val}</div>${trendHtml}</div>`;
+  }
+
+  function viewDashboard(main) {
+    const d = dashboardData();
+    const presetBtns = [['hoje', 'Hoje'], ['7d', '7 dias'], ['30d', '30 dias'], ['mes', 'Mês atual'], ['custom', 'Personalizado']]
+      .map(([id, l]) => `<button data-preset="${id}" class="${dashPreset === id ? 'active' : ''}">${l}</button>`).join('');
+    const temDados = d.m.qtdLancamentos > 0;
+    const lucroNeg = d.cards.lucro.v < 0;
+
+    const customPanel = dashPreset === 'custom'
+      ? `<div class="card card-pad" style="margin-bottom:18px;display:flex;flex-wrap:wrap;gap:14px;align-items:flex-end">
+          <div class="field"><label>Início</label><input type="date" id="dtIni" class="input" value="${dashCustom.inicio}" max="${dashCustom.fim}"></div>
+          <div class="field"><label>Fim</label><input type="date" id="dtFim" class="input" value="${dashCustom.fim}" min="${dashCustom.inicio}" max="${hojeISO()}"></div>
+        </div>` : '';
+
+    main.innerHTML = `<div class="view">
+      ${db.exemplo ? `<div class="banner"><span>👋 Você está vendo <b>dados de exemplo</b> para explorar o app. Comece do zero quando quiser.</span><button class="btn ghost sm" id="clearSeed">Limpar dados de exemplo</button></div>` : ''}
+      ${head('Dashboard', 'Visão geral da performance financeira da agência', `<div class="segmented" id="presets">${presetBtns}</div>`)}
+      ${customPanel}
+      <div class="grid" style="grid-template-columns:repeat(auto-fit,minmax(180px,1fr))">
+        ${kpi('Receita bruta', fmtBRL(d.cards.receitaBruta.v), 'dollar', 'sky', d.cards.receitaBruta.t)}
+        ${kpi('Sua receita líquida', fmtBRL(d.cards.receitaLiquida.v), 'wallet', 'primary', d.cards.receitaLiquida.t)}
+        ${kpi('Pago a influenciadores', fmtBRL(d.cards.totalPago.v), 'users', 'warning', d.cards.totalPago.t, true)}
+        ${kpi('Gastos extras', fmtBRL(d.cards.gastosExtras.v), 'receipt', 'warning', d.cards.gastosExtras.t, true)}
+        ${kpi(lucroNeg ? 'Prejuízo do período' : 'Lucro do período', fmtBRL(d.cards.lucro.v), 'trendUp', lucroNeg ? 'danger' : 'success', d.cards.lucro.t)}
+      </div>
+      <div class="grid" style="grid-template-columns:2fr 1fr;margin-top:16px" id="chartsRow">
+        <div class="card"><div class="card-head"><h3>Evolução do lucro diário</h3><p>Lucro líquido por dia no período</p></div>
+          <div class="card-pad">${temDados ? '<div class="chart" id="lineC"></div>' : emptyState('inbox', 'Sem dados no período', 'Registre lançamentos para ver a evolução.')}</div></div>
+        <div class="card"><div class="card-head"><h3>Lucro por influenciador</h3><p>Top desempenhos no período</p></div>
+          <div class="card-pad">${d.lista.length ? '<div class="chart" id="barC"></div>' : emptyState('inbox', 'Sem dados', 'Nenhum lançamento no período.')}</div></div>
+      </div>
+      <div class="card" style="margin-top:16px"><div class="card-head"><h3>${svg('alert')} Parcerias no prejuízo</h3><p>Precisam de atenção no período selecionado</p></div>
+        <div class="card-pad">${d.prejuizos.length
+          ? `<div style="display:flex;flex-direction:column;gap:8px">${d.prejuizos.map((p) => `
+            <a href="#/influenciadores/${p.id}" style="text-decoration:none;color:inherit;display:flex;justify-content:space-between;align-items:center;gap:12px;border:1px solid color-mix(in srgb,var(--danger) 22%,transparent);background:var(--danger-soft);border-radius:12px;padding:12px 15px">
+              <div><div style="font-weight:600">${esc(p.nome)}</div><div class="muted" style="font-size:12px">${esc(p.instagram || '')}</div></div>
+              <div style="display:flex;align-items:center;gap:14px"><div style="text-align:right"><div class="neg tnum" style="font-weight:700">${fmtBRL(p.lucro)}</div><div class="muted" style="font-size:12px">ROI ${fmtPct(p.roi)}</div></div>${svg('arrowRight')}</div>
+            </a>`).join('')}</div>`
+          : emptyState('trophy', 'Nenhuma parceria no prejuízo 🎉', 'Todas as parcerias estão positivas no período.')}</div>
+      </div>
+    </div>`;
+
+    if (temDados) lineChart(document.getElementById('lineC'), d.serie);
+    if (d.lista.length) barChart(document.getElementById('barC'), d.lista);
+    responsiveCharts();
+
+    document.getElementById('presets').addEventListener('click', (e) => {
+      const b = e.target.closest('button'); if (!b) return;
+      dashPreset = b.dataset.preset; router();
+    });
+    const clr = document.getElementById('clearSeed');
+    if (clr) clr.addEventListener('click', () => openConfirm('Limpar dados de exemplo?', 'Todos os influenciadores e lançamentos de exemplo serão removidos. Você começará com o app vazio.', 'Limpar tudo', () => {
+      db = { config: { minhaParticipacao: 80, atualizadoEm: new Date().toISOString() }, configHistorico: [], influenciadores: [], lancamentos: [], seq: 1, exemplo: false };
+      save(); closeModal(); router();
+    }));
+    const di = document.getElementById('dtIni'), df = document.getElementById('dtFim');
+    if (di) di.addEventListener('change', (e) => { dashCustom.inicio = e.target.value; router(); });
+    if (df) df.addEventListener('change', (e) => { dashCustom.fim = e.target.value; router(); });
+  }
+
+  function responsiveCharts() {
+    const row = document.getElementById('chartsRow');
+    if (row && window.innerWidth < 820) row.style.gridTemplateColumns = '1fr';
+  }
+
+  /* ============================================================
+     VIEW: Influenciadores (lista)
+  ============================================================ */
+  let infBusca = '', infStatus = 'todos', infModelo = 'todos', infOrd = 'nome';
+
+  function viewInfluenciadores(main) {
+    const lista = db.influenciadores.map((inf) => ({ inf, m: metricas(lancsDe(inf.id)) }));
+    let filtrada = lista.filter(({ inf }) => {
+      const q = infBusca.trim().toLowerCase();
+      const mb = !q || inf.nome.toLowerCase().includes(q) || (inf.instagram || '').toLowerCase().includes(q);
+      return mb && (infStatus === 'todos' || inf.status === infStatus) && (infModelo === 'todos' || inf.modeloPagamento === infModelo);
+    });
+    filtrada.sort((a, b) => {
+      if (infOrd === 'lucro') return b.m.lucro - a.m.lucro;
+      if (infOrd === 'roi') return (b.m.roi ?? -Infinity) - (a.m.roi ?? -Infinity);
+      if (infOrd === 'lancamentos') return b.m.qtdLancamentos - a.m.qtdLancamentos;
+      return a.inf.nome.localeCompare(b.inf.nome);
+    });
+
+    const cards = filtrada.map(({ inf, m }) => {
+      const neg = m.lucro < 0;
+      return `<div class="card inf-card" data-go="influenciadores/${inf.id}">
+        <div class="row"><div style="min-width:0"><div class="name">${esc(inf.nome)}</div><div class="muted" style="font-size:13px">${esc(inf.instagram || 'sem @')}</div></div>${statusBadge(inf.status)}</div>
+        <div class="chips" style="margin-top:12px">${modBadge(inf.modeloPagamento)}<span class="muted" style="font-size:12px">${m.qtdLancamentos} lançamento${m.qtdLancamentos === 1 ? '' : 's'}</span></div>
+        <div class="foot"><div><div class="lbl">Lucro acumulado</div><div class="big ${neg ? 'neg' : 'pos'} tnum">${svg(neg ? 'trendDown' : 'trendUp')}${fmtBRL(m.lucro)}</div></div>
+          <div style="text-align:right"><div class="lbl">ROI</div><div class="big tnum" style="justify-content:flex-end">${fmtPct(m.roi)}</div></div></div>
+      </div>`;
+    }).join('');
+
+    main.innerHTML = `<div class="view">
+      ${head('Influenciadores', 'Gerencie parcerias e acompanhe a rentabilidade de cada uma', `<button class="btn" id="novoInf">${svg('plus')}Novo influenciador</button>`)}
+      <div style="display:flex;flex-wrap:wrap;gap:10px;margin-bottom:18px">
+        <div class="search">${svg('search')}<input class="input" id="fBusca" placeholder="Buscar por nome ou @…" value="${esc(infBusca)}"></div>
+        <select class="select" id="fStatus" style="max-width:180px">${opt(['todos', 'negociando', 'fechado', 'pausado'], infStatus, { todos: 'Todos os status', negociando: 'Negociando', fechado: 'Fechado', pausado: 'Pausado' })}</select>
+        <select class="select" id="fModelo" style="max-width:180px">${opt(['todos', 'stories', 'fixo', 'percentual'], infModelo, { todos: 'Todos os modelos', stories: 'Stories', fixo: 'Fixo', percentual: 'Percentual' })}</select>
+        <select class="select" id="fOrd" style="max-width:210px">${opt(['nome', 'lucro', 'roi', 'lancamentos'], infOrd, { nome: 'Ordenar: Nome', lucro: 'Ordenar: Lucro', roi: 'Ordenar: ROI', lancamentos: 'Ordenar: Nº lançamentos' })}</select>
+      </div>
+      ${filtrada.length ? `<div class="grid inf-grid">${cards}</div>`
+        : `<div class="card">${emptyState('users', db.influenciadores.length === 0 ? 'Nenhum influenciador cadastrado' : 'Nenhum resultado',
+            db.influenciadores.length === 0 ? 'Cadastre seu primeiro influenciador para começar.' : 'Ajuste os filtros ou a busca.',
+            db.influenciadores.length === 0 ? `<button class="btn" id="novoInf2">${svg('plus')}Novo influenciador</button>` : '')}</div>`}
+    </div>`;
+
+    const fb = document.getElementById('fBusca');
+    fb.addEventListener('input', (e) => { infBusca = e.target.value; const at = e.target.selectionStart; viewInfluenciadores(main); const nf = document.getElementById('fBusca'); nf.focus(); nf.setSelectionRange(at, at); });
+    document.getElementById('fStatus').addEventListener('change', (e) => { infStatus = e.target.value; viewInfluenciadores(main); });
+    document.getElementById('fModelo').addEventListener('change', (e) => { infModelo = e.target.value; viewInfluenciadores(main); });
+    document.getElementById('fOrd').addEventListener('change', (e) => { infOrd = e.target.value; viewInfluenciadores(main); });
+    main.querySelectorAll('[data-go]').forEach((c) => c.addEventListener('click', () => go(c.dataset.go)));
+    ['novoInf', 'novoInf2'].forEach((id) => { const b = document.getElementById(id); if (b) b.addEventListener('click', () => openInfForm(null)); });
+  }
+  const opt = (vals, sel, labels) => vals.map((v) => `<option value="${v}" ${v === sel ? 'selected' : ''}>${labels[v]}</option>`).join('');
+
+  /* ============================================================
+     VIEW: Detalhe do influenciador
+  ============================================================ */
+  function viewDetalhe(main, id) {
+    const inf = db.influenciadores.find((x) => x.id === id);
+    if (!inf) { go('influenciadores'); return; }
+    const lancs = lancsDe(id);
+    const m = metricas(lancs);
+    const dicas = gerarDicas(lancs, m);
+    const lancHoje = lancs.find((l) => l.data === hojeISO());
+    const dias = inf.dataInicio ? Math.max(0, Math.floor((new Date(hojeISO() + 'T00:00:00') - new Date(inf.dataInicio + 'T00:00:00')) / 86400000)) : null;
+    const serie = lancs.map((l) => ({ data: l.data, lucro: l.lucro }));
+
+    const metaChips = [];
+    if (inf.dataInicio) metaChips.push(`${svg('calendar')} Início ${fmtData(inf.dataInicio)}${dias != null ? ` · ${dias} dias de parceria` : ''}`);
+    if (inf.modeloPagamento === 'percentual' && inf.percentualComissao != null) metaChips.push(`Comissão: ${fmtPct(inf.percentualComissao)}`);
+    if (inf.modeloPagamento === 'fixo' && inf.valorFixo != null) metaChips.push(`Fixo: ${fmtBRL(inf.valorFixo)} / ${inf.recorrencia || ''}`);
+    if (inf.modeloPagamento === 'stories') {
+      if (inf.valorPorStory != null) metaChips.push(`${fmtBRL(inf.valorPorStory)} / story${inf.qtdStoriesPadrao != null ? ` · ${inf.qtdStoriesPadrao} stories` : ''}`);
+      if (inf.diasDivulgacao != null) metaChips.push(`${svg('calendar')} ${inf.diasDivulgacao} dias de divulgação`);
+    }
+
+    const metric = (lbl, val, icon, tone) => `<div class="metric"><div class="m-lbl">${svg(icon)}${lbl}</div><div class="m-val tnum" ${tone ? `style="color:${tone}"` : ''}>${val}</div></div>`;
+    const dicaIco = { sucesso: 'check', perigo: 'x', alerta: 'alert', info: 'info' };
+
+    const linhas = [...lancs].sort((a, b) => b.data.localeCompare(a.data)).map((l) => `
+      <tr><td style="font-weight:600">${fmtData(l.data)}</td>
+        <td class="ta-r tnum">${fmtNum(l.cadastros)}</td>
+        <td class="ta-r tnum">${fmtBRL(l.receitaBruta)}${l.depositos.length ? ` <span class="muted" style="font-size:11px">(${l.depositos.length} dep.)</span>` : ''}</td>
+        <td class="ta-r tnum">${fmtBRL(l.receitaLiquida)}</td>
+        <td class="ta-r tnum muted">${fmtPct(l.percentualAplicado)}</td>
+        <td class="ta-r tnum warn">${fmtBRL(l.valorPago)}</td>
+        <td class="ta-r tnum ${l.lucro < 0 ? 'neg' : 'pos'}" style="font-weight:700">${fmtBRL(l.lucro)}</td>
+        <td class="ta-r"><div style="display:flex;gap:2px;justify-content:flex-end"><button class="icon-btn" data-dep="${l.id}" title="Adicionar depósito" style="color:var(--accent)">${svg('coins')}</button><button class="icon-btn" data-edit="${l.id}" title="Editar">${svg('pencil')}</button><button class="icon-btn del" data-del="${l.id}" title="Excluir">${svg('trash')}</button></div></td></tr>`).join('');
+
+    main.innerHTML = `<div class="view">
+      <button class="back-link" id="back">${svg('arrowLeft')} Voltar para influenciadores</button>
+      <div class="card card-pad">
+        <div style="display:flex;flex-wrap:wrap;gap:16px;justify-content:space-between;align-items:flex-start">
+          <div style="display:flex;gap:16px;align-items:flex-start">
+            <div class="avatar">${esc(inf.nome.charAt(0).toUpperCase())}</div>
+            <div>
+              <div class="chips"><h1 style="font-size:24px;font-weight:800">${esc(inf.nome)}</h1>${statusBadge(inf.status)}${modBadge(inf.modeloPagamento)}</div>
+              <div class="muted" style="font-size:13px;margin-top:4px">${esc(inf.instagram || 'sem @')}</div>
+              <div class="chips muted" style="font-size:12px;margin-top:8px;gap:14px">${metaChips.map((c) => `<span class="chips" style="gap:5px">${c}</span>`).join('')}</div>
+            </div>
+          </div>
+          <div style="display:flex;flex-wrap:wrap;gap:8px;align-items:center;justify-content:flex-end">
+            <button class="btn ghost sm" id="editInf">${svg('pencil')}Editar</button>
+            <button class="icon-btn del" id="delInf">${svg('trash')}</button>
+            ${lancHoje
+              ? `<button class="btn ghost sm" id="novoLanc">${svg('plus')}Novo lançamento</button><button class="btn" id="depHoje">${svg('coins')} Depósito de hoje</button>`
+              : `<button class="btn" id="novoLanc">${svg('plus')}Novo lançamento</button>`}
+          </div>
+        </div>
+        ${lancHoje ? `<div class="box" style="margin-top:16px;display:flex;flex-wrap:wrap;gap:10px;justify-content:space-between;align-items:center;border-color:color-mix(in srgb,var(--accent) 25%,transparent);background:var(--accent-soft)"><div style="font-size:13px"><b>Já há um lançamento hoje</b> · ${fmtBRL(somaDep(lancHoje.depositos))} em ${lancHoje.depositos.length} depósito(s). <span class="muted">Some os novos depósitos aqui — não crie outro lançamento (evita cobrar o pagamento de novo).</span></div><button class="btn soft sm" id="depHoje2">${svg('coins')} Adicionar depósito</button></div>` : ''}
+        ${inf.observacoes ? `<div class="box" style="margin-top:16px;color:var(--muted)">${esc(inf.observacoes)}</div>` : ''}
+      </div>
+
+      <div class="grid" style="grid-template-columns:repeat(auto-fit,minmax(150px,1fr));margin-top:16px">
+        ${metric('Receita líquida', fmtBRL(m.receitaLiquidaTotal), 'wallet', 'var(--accent)')}
+        ${metric('Total pago', fmtBRL(m.totalPago), 'users', 'var(--warning)')}
+        ${metric(m.lucro < 0 ? 'Prejuízo' : 'Lucro', fmtBRL(m.lucro), 'trendUp', m.lucro < 0 ? 'var(--danger)' : 'var(--success)')}
+        ${metric('ROI', fmtPct(m.roi), 'target')}
+        ${metric('Cadastros totais', fmtNum(m.cadastrosTotais), 'users')}
+        ${metric('Bruto total (entrou)', fmtBRL(m.receitaBrutaTotal), 'coins')}
+        ${metric('Custo / cadastro', m.custoPorCadastro != null ? fmtBRL(m.custoPorCadastro) : '—', 'target')}
+        ${inf.modeloPagamento === 'stories' ? metric('Custo médio / story', m.custoMedioPorStory != null ? fmtBRL(m.custoMedioPorStory) : '—', 'film') : metric('Gastos extras', fmtBRL(m.gastosExtrasTotal), 'coins')}
+      </div>
+
+      <div class="grid" style="grid-template-columns:2fr 1fr;margin-top:16px" id="detRow">
+        <div class="card"><div class="card-head"><h3>Evolução do lucro</h3><p>Lucro por lançamento ao longo do tempo</p></div>
+          <div class="card-pad">${serie.length ? '<div class="chart" id="lineD"></div>' : emptyState('inbox', 'Sem lançamentos', 'Adicione um lançamento para ver a evolução.')}</div></div>
+        <div class="card"><div class="card-head"><h3>${svg('bulb')} Dicas e feedbacks</h3><p>Análises automáticas da parceria</p></div>
+          <div class="card-pad" style="display:flex;flex-direction:column;gap:10px">${dicas.map((d) => `<div class="dica d-${d.tipo}">${svg(dicaIco[d.tipo])}<div><b>${esc(d.titulo)}</b><p>${esc(d.texto)}</p></div></div>`).join('')}</div></div>
+      </div>
+
+      <div class="card" style="margin-top:16px">
+        <div class="card-head" style="display:flex;justify-content:space-between;align-items:center">
+          <div><h3>Histórico de lançamentos</h3><p>${m.qtdLancamentos} lançamento(s) registrado(s)</p></div>
+          <button class="btn ghost sm" id="addLanc">${svg('plus')}Novo lançamento</button>
+        </div>
+        ${lancs.length ? `<div class="tbl-wrap"><table><thead><tr>
+          <th>Data</th><th class="ta-r">Cadastros</th><th class="ta-r">Bruto (entrou)</th><th class="ta-r">Rec. líquida</th><th class="ta-r">%</th><th class="ta-r">Pago</th><th class="ta-r">Lucro</th><th class="ta-r">Ações</th>
+        </tr></thead><tbody>${linhas}</tbody></table></div>`
+          : emptyState('inbox', 'Nenhum lançamento', 'Registre o primeiro lançamento desta parceria.')}
+      </div>
+    </div>`;
+
+    if (serie.length) lineChart(document.getElementById('lineD'), serie);
+    const row = document.getElementById('detRow');
+    if (row && window.innerWidth < 820) row.style.gridTemplateColumns = '1fr';
+
+    document.getElementById('back').addEventListener('click', () => go('influenciadores'));
+    document.getElementById('editInf').addEventListener('click', () => openInfForm(inf));
+    document.getElementById('delInf').addEventListener('click', () => openConfirm('Excluir influenciador?', 'Todos os lançamentos vinculados também serão removidos. Esta ação não pode ser desfeita.', 'Excluir', () => {
+      db.influenciadores = db.influenciadores.filter((x) => x.id !== id);
+      db.lancamentos = db.lancamentos.filter((l) => l.influenciadorId !== id);
+      save(); closeModal(); go('influenciadores');
+    }));
+    document.getElementById('novoLanc').addEventListener('click', () => openLancForm(inf, null));
+    document.getElementById('addLanc').addEventListener('click', () => openLancForm(inf, null));
+    ['depHoje', 'depHoje2'].forEach((bid) => { const b = document.getElementById(bid); if (b) b.addEventListener('click', () => openQuickDeposito(inf, lancHoje)); });
+    main.querySelectorAll('[data-dep]').forEach((b) => b.addEventListener('click', () => openQuickDeposito(inf, db.lancamentos.find((l) => l.id === +b.dataset.dep))));
+    main.querySelectorAll('[data-edit]').forEach((b) => b.addEventListener('click', () => openLancForm(inf, db.lancamentos.find((l) => l.id === +b.dataset.edit))));
+    main.querySelectorAll('[data-del]').forEach((b) => b.addEventListener('click', () => {
+      const l = db.lancamentos.find((x) => x.id === +b.dataset.del);
+      openConfirm('Excluir lançamento?', `Lançamento de ${fmtData(l.data)} será removido permanentemente.`, 'Excluir', () => {
+        db.lancamentos = db.lancamentos.filter((x) => x.id !== l.id); save(); closeModal(); viewDetalhe(main, id);
+      });
+    }));
+  }
+
+  /* ============================================================
+     VIEW: Ranking
+  ============================================================ */
+  let rankCrit = 'lucro';
+  const CRIT = {
+    lucro: { label: 'Lucro total', get: (m) => m.lucro, fmt: fmtBRL, desc: true },
+    roi: { label: 'ROI', get: (m) => m.roi, fmt: fmtPct, desc: true },
+    custoCadastro: { label: 'Menor custo/cadastro', get: (m) => m.custoPorCadastro, fmt: (v) => (v != null ? fmtBRL(v) : '—'), desc: false },
+    custoStory: { label: 'Menor custo/story', get: (m) => m.custoMedioPorStory, fmt: (v) => (v != null ? fmtBRL(v) : '—'), desc: false, soStories: true },
+  };
+  function viewRanking(main) {
+    let lista = db.influenciadores.map((inf) => ({ inf, m: metricas(lancsDe(inf.id)) })).filter((x) => x.m.qtdLancamentos > 0);
+    const c = CRIT[rankCrit];
+    if (c.soStories) lista = lista.filter((x) => x.inf.modeloPagamento === 'stories');
+    lista.sort((a, b) => {
+      const va = c.get(a.m), vb = c.get(b.m);
+      if (va == null && vb == null) return 0;
+      if (va == null) return 1; if (vb == null) return -1;
+      return c.desc ? vb - va : va - vb;
+    });
+    const top3 = lista.slice(0, 3), resto = lista.slice(3);
+    const POD = [{ ico: 'crown', cls: 'g1', lbl: '1º' }, { ico: 'medal', cls: 'g2', lbl: '2º' }, { ico: 'award', cls: 'g3', lbl: '3º' }];
+    const critBtns = Object.entries(CRIT).map(([k, v]) => `<button data-crit="${k}" class="${rankCrit === k ? 'active' : ''}">${v.label}</button>`).join('');
+
+    main.innerHTML = `<div class="view">
+      ${head('Ranking', 'Compare o desempenho das parcerias por diferentes critérios', `<div class="segmented" id="crit">${critBtns}</div>`)}
+      ${lista.length === 0 ? `<div class="card">${emptyState('trophy', 'Sem dados para o ranking', 'Registre lançamentos para que os influenciadores apareçam aqui.')}</div>`
+        : `<div class="grid podium">${top3.map((x, i) => {
+            const p = POD[i]; const val = c.get(x.m);
+            const neg = rankCrit === 'lucro' && x.m.lucro < 0;
+            return `<div class="card pod" data-go="influenciadores/${x.inf.id}" ${i === 0 ? 'style="transform:translateY(-6px)"' : ''}>
+              <div class="medal ${p.cls}">${svg(p.ico)}</div><div class="place ${p.cls}">${p.lbl} lugar</div>
+              <div class="pod-name">${esc(x.inf.nome)}</div><div class="muted" style="font-size:12px">${esc(x.inf.instagram || 'sem @')}</div>
+              <div class="pod-val tnum ${rankCrit === 'lucro' ? (neg ? 'neg' : 'pos') : ''}">${c.fmt(val)}</div>
+              <div style="margin-top:8px">${modBadge(x.inf.modeloPagamento)}</div></div>`;
+          }).join('')}</div>
+          ${resto.length ? `<div class="card" style="margin-top:16px"><div class="tbl-wrap"><table><thead><tr><th>#</th><th>Influenciador</th><th>Modelo</th><th class="ta-r">Lucro</th><th class="ta-r">ROI</th><th class="ta-r">${c.label}</th></tr></thead><tbody>${resto.map((x, i) => `
+            <tr data-go="influenciadores/${x.inf.id}" style="cursor:pointer"><td style="font-weight:700" class="muted">${i + 4}</td>
+              <td><div style="font-weight:600">${esc(x.inf.nome)}</div><div class="muted" style="font-size:12px">${esc(x.inf.instagram || 'sem @')}</div></td>
+              <td>${modBadge(x.inf.modeloPagamento)}</td>
+              <td class="ta-r tnum ${x.m.lucro < 0 ? 'neg' : 'pos'}" style="font-weight:600">${fmtBRL(x.m.lucro)}</td>
+              <td class="ta-r tnum muted">${fmtPct(x.m.roi)}</td>
+              <td class="ta-r tnum" style="font-weight:700">${c.fmt(c.get(x.m))}</td></tr>`).join('')}</tbody></table></div></div>` : ''}`}
+    </div>`;
+
+    document.getElementById('crit').addEventListener('click', (e) => { const b = e.target.closest('button'); if (b) { rankCrit = b.dataset.crit; viewRanking(main); } });
+    main.querySelectorAll('[data-go]').forEach((el) => el.addEventListener('click', () => go(el.dataset.go)));
+  }
+
+  /* ============================================================
+     VIEW: Configurações
+  ============================================================ */
+  function viewConfig(main) {
+    const c = db.config;
+    const hist = [...db.configHistorico].sort((a, b) => b.alteradoEm.localeCompare(a.alteradoEm));
+    main.innerHTML = `<div class="view">
+      ${head('Configurações', 'Parâmetros globais da agência', `<span data-sync class="sync-tag ${SYNC.on ? 'ok' : 'warn2'}">${SYNC.on ? svg('check') + ' Sincronizado com sua conta' : svg('info') + ' Salvando só neste navegador'}</span>`)}
+      <div class="grid" style="grid-template-columns:1fr 1fr" id="cfgRow">
+        <div class="card"><div class="card-head"><h3>${svg('percent')} Sua participação global</h3><p>Percentual da receita bruta que fica com a agência (o restante é do dono da plataforma).</p></div>
+          <div class="card-pad" style="display:flex;flex-direction:column;gap:14px">
+            <div class="field"><label>Participação da agência (%)</label>
+              <div style="display:flex;gap:10px;align-items:center">
+                <input type="number" min="0" max="100" step="0.1" id="cfgVal" class="input" style="font-size:17px;font-weight:700" value="${c.minhaParticipacao}">
+                <button class="btn" id="cfgSave">${svg('save')}Salvar</button>
+              </div>
+            </div>
+            <div class="hint-box s" style="display:flex;gap:10px"><span style="color:var(--sky)">${svg('info')}</span><span>Alterar este valor <b style="color:var(--text)">não recalcula</b> lançamentos antigos. Cada lançamento guarda o percentual vigente no momento em que foi criado (snapshot histórico).</span></div>
+            <div id="cfgMsg"></div>
+            <p class="muted" style="font-size:12px">Atual: <b style="color:var(--text)">${fmtPct(c.minhaParticipacao)}</b> · atualizado em ${fmtData(c.atualizadoEm)}</p>
+          </div>
+        </div>
+        <div class="card"><div class="card-head"><h3>${svg('history')} Histórico de alterações</h3><p>Registro das mudanças no percentual da agência</p></div>
+          <div class="card-pad">${hist.length ? `<div class="timeline">${hist.map((h) => `<div class="tl-item"><div class="tl-row"><div class="chips">${h.valorAnterior != null ? `<span class="strike">${fmtPct(h.valorAnterior)}</span>` : ''}<span style="color:var(--accent);font-weight:700">→ ${fmtPct(h.minhaParticipacao)}</span></div><span class="muted" style="font-size:12px">${fmtData(h.alteradoEm)}</span></div></div>`).join('')}</div>`
+            : emptyState('history', 'Sem alterações', 'As mudanças no percentual aparecerão aqui.')}</div>
+        </div>
+      </div>
+
+      <div class="card" style="margin-top:16px"><div class="card-head"><h3>${svg('coins')} Valores rápidos de depósito</h3><p>Os botões que aparecem ao lançar depósitos. Deixe só os valores que você mais usa.</p></div>
+        <div class="card-pad" style="display:flex;flex-direction:column;gap:14px">
+          <div class="chip-adds" id="presetChips">${presetsDep().map((v, i) => `<span class="dep-chip">R$ ${v}<button type="button" class="preset-rm" data-i="${i}" aria-label="remover">${svg('close')}</button></span>`).join('')}</div>
+          <div class="field" style="max-width:320px"><label>Adicionar um valor (R$)</label><div style="display:flex;gap:8px"><input type="number" min="0" step="1" id="presetNew" class="input" placeholder="Ex: 200"><button class="btn soft" id="presetAdd">${svg('plus')}Adicionar</button></div></div>
+          <div id="presetMsg"></div>
+        </div>
+      </div>
+
+      <div class="card" style="margin-top:16px"><div class="card-head"><h3>${svg('save')} Backup dos dados</h3><p>${SYNC.on ? 'Seus dados já ficam salvos na sua conta e sincronizam entre dispositivos. Ainda assim, dá pra guardar uma cópia.' : 'Guarde uma cópia dos seus dados para não perder nada (útil ao trocar de navegador ou dispositivo).'}</p></div>
+        <div class="card-pad" style="display:flex;flex-direction:column;gap:14px">
+          <div style="display:flex;flex-wrap:wrap;gap:10px">
+            <button class="btn soft" id="btnExport">${svg('save')} Exportar (copiar)</button>
+            <button class="btn ghost" id="btnImport">${svg('history')} Restaurar de um backup</button>
+          </div>
+          <textarea class="textarea" id="backupBox" placeholder="A cópia dos seus dados aparece aqui ao exportar. Para restaurar, cole aqui um backup e clique em Restaurar." style="min-height:96px;font-family:ui-monospace,monospace;font-size:12px"></textarea>
+          <div id="backupMsg"></div>
+          <p class="muted" style="font-size:12px">Exportar copia todos os dados para a área de transferência (e mostra na caixa acima). Restaurar substitui os dados atuais pelo backup colado.</p>
+        </div>
+      </div>
+    </div>`;
+    const row = document.getElementById('cfgRow');
+    if (row && window.innerWidth < 720) row.style.gridTemplateColumns = '1fr';
+
+    const addPreset = () => {
+      const inp = document.getElementById('presetNew');
+      const msg = document.getElementById('presetMsg');
+      const v = Math.round(Number(inp.value));
+      if (!v || v <= 0) { msg.innerHTML = `<div class="form-err">Informe um valor maior que zero.</div>`; return; }
+      const atual = presetsDep();
+      if (atual.includes(v)) { msg.innerHTML = `<div class="form-err">Esse valor já está na lista.</div>`; return; }
+      if (atual.length >= 12) { msg.innerHTML = `<div class="form-err">Máximo de 12 valores.</div>`; return; }
+      db.presetsDeposito = [...atual, v].sort((a, b) => a - b);
+      save(); viewConfig(main);
+    };
+    document.querySelectorAll('.preset-rm').forEach((b) => b.addEventListener('click', () => {
+      const atual = presetsDep();
+      if (atual.length <= 1) { document.getElementById('presetMsg').innerHTML = `<div class="form-err">Deixe ao menos um valor.</div>`; return; }
+      db.presetsDeposito = atual.filter((_, i) => i !== +b.dataset.i);
+      save(); viewConfig(main);
+    }));
+    document.getElementById('presetAdd').addEventListener('click', addPreset);
+    document.getElementById('presetNew').addEventListener('keydown', (e) => { if (e.key === 'Enter') { e.preventDefault(); addPreset(); } });
+
+    document.getElementById('btnExport').addEventListener('click', async () => {
+      const json = JSON.stringify(db);
+      const box = document.getElementById('backupBox');
+      box.value = json;
+      box.focus(); box.select();
+      let copiado = false;
+      try { await navigator.clipboard.writeText(json); copiado = true; } catch (e) {
+        try { document.execCommand('copy'); copiado = true; } catch (e2) {}
+      }
+      document.getElementById('backupMsg').innerHTML = `<div class="form-ok">${svg('check')}${copiado ? 'Backup copiado para a área de transferência.' : 'Backup gerado na caixa acima — selecione e copie (Ctrl+C).'}</div>`;
+    });
+    document.getElementById('btnImport').addEventListener('click', () => {
+      const txt = document.getElementById('backupBox').value.trim();
+      const msg = document.getElementById('backupMsg');
+      if (!txt) { msg.innerHTML = `<div class="form-err">Cole um backup na caixa acima antes de restaurar.</div>`; return; }
+      let novo;
+      try { novo = JSON.parse(txt); } catch (e) { msg.innerHTML = `<div class="form-err">Backup inválido (não é um JSON válido).</div>`; return; }
+      if (!novo || !Array.isArray(novo.influenciadores) || !Array.isArray(novo.lancamentos) || !novo.config) {
+        msg.innerHTML = `<div class="form-err">Esse texto não parece ser um backup do Controle iGaming.</div>`; return;
+      }
+      openConfirm('Restaurar backup?', 'Os dados atuais serão substituídos pelos dados do backup. Isso vale também para a versão salva na sua conta.', 'Restaurar', () => {
+        db = novo;
+        db.exemplo = false;
+        if (db.seq == null) db.seq = 1 + Math.max(0, ...db.influenciadores.map((x) => x.id || 0), ...db.lancamentos.map((x) => x.id || 0));
+        normalize();
+        save();
+        closeModal();
+        viewConfig(main);
+      });
+    });
+    document.getElementById('cfgSave').addEventListener('click', () => {
+      const n = Number(document.getElementById('cfgVal').value);
+      const msg = document.getElementById('cfgMsg');
+      if (isNaN(n) || n < 0 || n > 100) { msg.innerHTML = `<div class="form-err">Informe um valor entre 0 e 100.</div>`; return; }
+      if (n === c.minhaParticipacao) { msg.innerHTML = `<div class="form-err">O valor é o mesmo já configurado.</div>`; return; }
+      const now = new Date().toISOString();
+      db.configHistorico.push({ id: db.seq++, minhaParticipacao: n, valorAnterior: c.minhaParticipacao, alteradoEm: now });
+      db.config = { minhaParticipacao: n, atualizadoEm: now };
+      save(); viewConfig(main);
+      const m2 = document.getElementById('cfgMsg');
+      m2.innerHTML = `<div class="form-ok">${svg('check')}Participação atualizada com sucesso.</div>`;
+      setTimeout(() => { const e = document.getElementById('cfgMsg'); if (e) e.innerHTML = ''; }, 2500);
+    });
+  }
+
+  /* ============================================================
+     MODAIS
+  ============================================================ */
+  const modalRoot = document.getElementById('modalRoot');
+  function closeModal() {
+    modalRoot.innerHTML = '';
+    document.body.style.overflow = '';
+    if (remoteStash) { const r = remoteStash; remoteStash = null; adotarRemoto(r); }
+  }
+  function openModal(html, sm) {
+    modalRoot.innerHTML = `<div class="modal-back" id="mBack"><div class="modal ${sm ? 'sm' : ''}">${html}</div></div>`;
+    document.body.style.overflow = 'hidden';
+    document.getElementById('mBack').addEventListener('mousedown', (e) => { if (e.target.id === 'mBack') closeModal(); });
+  }
+  document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeModal(); });
+
+  function openConfirm(title, desc, confirmLabel, onConfirm) {
+    openModal(`<div class="modal-body" style="padding-top:26px">
+      <div style="width:44px;height:44px;border-radius:999px;background:var(--danger-soft);color:var(--danger);display:grid;place-items:center">${svg('alert')}</div>
+      <h2 style="font-size:18px">${title}</h2><p class="muted" style="margin:-6px 0 0;font-size:13.5px">${desc}</p>
+    </div><div class="modal-foot"><button class="btn ghost" id="cCancel">Cancelar</button><button class="btn danger" id="cOk">${confirmLabel}</button></div>`, true);
+    document.getElementById('cCancel').addEventListener('click', closeModal);
+    document.getElementById('cOk').addEventListener('click', onConfirm);
+  }
+
+  /* ---- Form Influenciador ---- */
+  const MODELOS_INFO = [
+    { v: 'stories', ico: 'film', t: 'Stories', d: 'Valor por post' },
+    { v: 'fixo', ico: 'wallet', t: 'Fixo', d: 'Valor recorrente' },
+    { v: 'percentual', ico: 'percent', t: 'Percentual', d: '% dos depósitos' },
+  ];
+  function openInfForm(inf) {
+    const ed = !!inf;
+    const f = ed
+      ? { valorPorStory: '', qtdStoriesPadrao: '', diasDivulgacao: '', percentualComissao: '', valorFixo: '', recorrencia: 'mensal', ...inf }
+      : { nome: '', instagram: '', status: 'negociando', dataInicio: '', modeloPagamento: 'stories', percentualComissao: '', valorFixo: '', recorrencia: 'mensal', valorPorStory: '', qtdStoriesPadrao: '', diasDivulgacao: '', observacoes: '' };
+
+    const render = () => {
+      const deal = f.modeloPagamento === 'percentual'
+        ? `<div class="deal-grid"><div class="field"><label>Comissão sobre depósitos (%)</label><input type="number" min="0" step="0.1" id="iPct" class="input" value="${f.percentualComissao ?? ''}" placeholder="Ex: 50"></div></div>
+           <p class="muted" style="font-size:12px;margin:10px 0 0">Ela recebe esse % sobre a soma dos depósitos gerados em cada lançamento.</p>`
+        : f.modeloPagamento === 'fixo'
+        ? `<div class="deal-grid"><div class="field"><label>Valor fixo (R$)</label><input type="number" min="0" step="0.01" id="iFixo" class="input" value="${f.valorFixo ?? ''}" placeholder="Ex: 1500"></div><div class="field"><label>Recorrência</label><select class="select" id="iRec">${opt(['mensal', 'quinzenal', 'semanal'], f.recorrencia || 'mensal', { mensal: 'Mensal', quinzenal: 'Quinzenal', semanal: 'Semanal' })}</select></div></div>
+           <p class="muted" style="font-size:12px;margin:10px 0 0">Já entra como valor pago em cada lançamento (editável em reajustes pontuais).</p>`
+        : `<div class="deal-grid"><div class="field"><label>Valor por story (R$)</label><input type="number" min="0" step="0.01" id="iVStory" class="input" value="${f.valorPorStory ?? ''}" placeholder="Ex: 250"></div><div class="field"><label>Qtd. de stories</label><input type="number" min="0" id="iQStory" class="input" value="${f.qtdStoriesPadrao ?? ''}" placeholder="Ex: 3"></div><div class="field"><label>Dias de divulgação</label><input type="number" min="0" id="iDias" class="input" value="${f.diasDivulgacao ?? ''}" placeholder="Ex: 7"></div></div>
+           <p class="muted" style="font-size:12px;margin:10px 0 0">Vira o padrão dos lançamentos — dá pra ajustar em cada post.</p>`;
+
+      const cards = MODELOS_INFO.map((m) => `<button type="button" class="model-opt ${f.modeloPagamento === m.v ? 'active' : ''}" data-mod="${m.v}"><span class="mo-ico">${svg(m.ico)}</span><div class="mo-t">${m.t}</div><div class="mo-d">${m.d}</div></button>`).join('');
+      const pills = ['negociando', 'fechado', 'pausado'].map((s) => `<button type="button" class="pill ${f.status === s ? 'active' : ''}" data-status="${s}">${STATUS_LBL[s]}</button>`).join('');
+
+      return `<div class="modal-head"><h2>${ed ? 'Editar influenciador' : 'Novo influenciador'}</h2><p>${ed ? 'Atualize os dados e o combinado da parceria.' : 'Só o nome é obrigatório — o resto você ajusta quando quiser.'}</p><button class="icon-btn modal-x" id="mX">${svg('close')}</button></div>
+      <div class="modal-body">
+        <div class="form-row c2"><div class="field"><label>Nome *</label><input class="input" id="iNome" value="${esc(f.nome)}" placeholder="Ex: Ana Souza"></div><div class="field"><label>@ do Instagram</label><input class="input" id="iInsta" value="${esc(f.instagram || '')}" placeholder="@anasouza"></div></div>
+        <div class="field"><label>Como você paga essa parceria?</label><div class="model-pick" id="iModPick">${cards}</div></div>
+        <div class="box" id="dealBox">${deal}</div>
+        <div class="form-row c2">
+          <div class="field"><label>Status</label><div class="pill-group" id="iStatusPills">${pills}</div></div>
+          <div class="field"><label>Início da parceria</label><input type="date" class="input" id="iData" value="${f.dataInicio || ''}"></div>
+        </div>
+        <div class="field"><label>Observações <span class="muted" style="font-weight:400">(opcional)</span></label><textarea class="textarea" id="iObs" placeholder="Notas sobre a parceria, condições, contatos…">${esc(f.observacoes || '')}</textarea></div>
+        <div id="iErr"></div>
+      </div>
+      <div class="modal-foot"><button class="btn ghost" id="mCancel">Cancelar</button><button class="btn" id="mSave">${ed ? 'Salvar alterações' : 'Cadastrar influenciador'}</button></div>`;
+    };
+
+    const readInto = () => {
+      const g = (id) => { const e = document.getElementById(id); return e ? e.value : undefined; };
+      f.nome = g('iNome'); f.instagram = g('iInsta'); f.dataInicio = g('iData'); f.observacoes = g('iObs');
+      if (g('iPct') !== undefined) f.percentualComissao = g('iPct');
+      if (g('iFixo') !== undefined) f.valorFixo = g('iFixo');
+      if (g('iRec') !== undefined) f.recorrencia = g('iRec');
+      if (g('iVStory') !== undefined) f.valorPorStory = g('iVStory');
+      if (g('iQStory') !== undefined) f.qtdStoriesPadrao = g('iQStory');
+      if (g('iDias') !== undefined) f.diasDivulgacao = g('iDias');
+    };
+    const rerender = () => { readInto(); modalRoot.querySelector('.modal').innerHTML = render(); wire(); };
+    const wire = () => {
+      document.getElementById('mX').addEventListener('click', closeModal);
+      document.getElementById('mCancel').addEventListener('click', closeModal);
+      document.getElementById('mSave').addEventListener('click', salvar);
+      modalRoot.querySelectorAll('#iModPick .model-opt').forEach((b) => b.addEventListener('click', () => { if (b.dataset.mod !== f.modeloPagamento) { f.modeloPagamento = b.dataset.mod; rerender(); } }));
+      modalRoot.querySelectorAll('#iStatusPills .pill').forEach((b) => b.addEventListener('click', () => {
+        f.status = b.dataset.status;
+        modalRoot.querySelectorAll('#iStatusPills .pill').forEach((p) => p.classList.toggle('active', p === b));
+      }));
+    };
+    const nOrNull = (v) => (v === '' || v == null ? null : Math.max(0, Number(v) || 0));
+    const salvar = () => {
+      readInto();
+      const err = document.getElementById('iErr');
+      if (!f.nome.trim()) { err.innerHTML = `<div class="form-err">O nome é obrigatório.</div>`; return; }
+      const rec = {
+        nome: f.nome.trim(), instagram: (f.instagram || '').trim() || null, status: f.status, dataInicio: f.dataInicio || null,
+        modeloPagamento: f.modeloPagamento, observacoes: (f.observacoes || '').trim() || null,
+        percentualComissao: f.modeloPagamento === 'percentual' ? nOrNull(f.percentualComissao) : null,
+        valorFixo: f.modeloPagamento === 'fixo' ? nOrNull(f.valorFixo) : null,
+        recorrencia: f.modeloPagamento === 'fixo' ? (f.recorrencia || 'mensal') : null,
+        valorPorStory: f.modeloPagamento === 'stories' ? nOrNull(f.valorPorStory) : null,
+        qtdStoriesPadrao: f.modeloPagamento === 'stories' ? nOrNull(f.qtdStoriesPadrao) : null,
+        diasDivulgacao: f.modeloPagamento === 'stories' ? nOrNull(f.diasDivulgacao) : null,
+      };
+      if (ed) { Object.assign(inf, rec); } else { db.influenciadores.push({ id: db.seq++, criadoEm: new Date().toISOString(), ...rec }); }
+      save(); closeModal(); router();
+    };
+    openModal(render());
+    wire();
+    setTimeout(() => { const n = document.getElementById('iNome'); if (n) n.focus(); }, 30);
+  }
+
+  /* ---- Form Lançamento ---- */
+  function openLancForm(inf, lanc) {
+    const ed = !!lanc;
+    const modelo = inf.modeloPagamento;
+    const f = ed
+      ? { data: lanc.data, cadastros: String(lanc.cadastros ?? ''), depositos: (lanc.depositos || []).map(String), receitaBruta: String(lanc.receitaBruta ?? ''), receitaBrutaManual: !!lanc.receitaBrutaManual || (lanc.receitaBruta != null && Math.abs((lanc.receitaBruta || 0) - somaDep(lanc.depositos)) > 0.01), percentualAplicado: String(lanc.percentualAplicado ?? ''), gastosExtras: String(lanc.gastosExtras ?? ''), observacoes: lanc.observacoes || '', quantidadeStories: lanc.quantidadeStories != null ? String(lanc.quantidadeStories) : '', valorCobrado: lanc.valorCobrado != null ? String(lanc.valorCobrado) : '', valorPago: lanc.valorPago != null ? String(lanc.valorPago) : '' }
+      : { data: hojeISO(), cadastros: '', depositos: [], receitaBruta: '', receitaBrutaManual: false, percentualAplicado: String(db.config.minhaParticipacao), gastosExtras: '', observacoes: '',
+          quantidadeStories: modelo === 'stories' && inf.qtdStoriesPadrao != null ? String(inf.qtdStoriesPadrao) : '',
+          valorCobrado: modelo === 'stories' && inf.valorPorStory != null ? String(round2(inf.valorPorStory * (inf.qtdStoriesPadrao != null ? inf.qtdStoriesPadrao : 1))) : '',
+          valorPago: modelo === 'fixo' && inf.valorFixo != null ? String(inf.valorFixo) : '' };
+    const num = (v) => (v === '' || v == null ? 0 : Number(v) || 0);
+    // Receita bruta acompanha a soma dos depósitos, a menos que editada à mão.
+    const somaDepF = () => round2(f.depositos.reduce((a, v) => a + num(v), 0));
+    const syncReceita = () => {
+      if (!f.receitaBrutaManual) {
+        f.receitaBruta = String(somaDepF());
+        const e = document.getElementById('lBruta');
+        if (e) e.value = f.receitaBruta;
+      }
+    };
+    const hojeLanc = !ed ? db.lancamentos.find((l) => l.influenciadorId === inf.id && l.data === hojeISO()) : null;
+
+    const preview = () => {
+      const totalDep = f.depositos.reduce((a, v) => a + num(v), 0);
+      const recLiq = (num(f.receitaBruta) * num(f.percentualAplicado)) / 100;
+      let pago = 0;
+      if (modelo === 'stories') pago = num(f.valorCobrado);
+      else if (modelo === 'fixo') pago = num(f.valorPago);
+      else pago = f.valorPago !== '' ? num(f.valorPago) : (totalDep * num(inf.percentualComissao)) / 100;
+      const lucro = recLiq - pago - num(f.gastosExtras);
+      const cps = modelo === 'stories' && num(f.quantidadeStories) > 0 ? num(f.valorCobrado) / num(f.quantidadeStories) : null;
+      return { totalDep, recLiq, lucro, cps };
+    };
+
+    const render = () => {
+      const p = preview();
+      const espec = modelo === 'stories'
+        ? `<div class="hint-box f"><div class="form-row c3"><div class="field"><label>Qtd. de stories</label><input type="number" min="0" id="lQtd" class="input" value="${f.quantidadeStories}" placeholder="Ex: 3"></div><div class="field"><label>Valor cobrado (R$)</label><input type="number" min="0" step="0.01" id="lCob" class="input" value="${f.valorCobrado}" placeholder="Ex: 250"></div><div class="field"><label>Custo por story</label><div class="readonly-val" id="lCps" style="color:#d946ef">${p.cps != null ? fmtBRL(p.cps) : '—'}</div></div></div></div>`
+        : modelo === 'fixo'
+        ? `<div class="hint-box s"><label style="display:block;color:var(--muted);font-size:13px;font-weight:500;margin-bottom:6px">Valor pago neste lançamento (R$)</label><input type="number" min="0" step="0.01" id="lPago" class="input" value="${f.valorPago}" placeholder="${inf.valorFixo ?? '0,00'}"><p style="margin:8px 0 0">Herdado do valor fixo cadastrado (${fmtBRL(inf.valorFixo || 0)}). Ajuste para reajustes pontuais.</p></div>`
+        : `<div class="hint-box v"><label style="display:block;color:var(--muted);font-size:13px;font-weight:500;margin-bottom:6px">Valor pago (auto = ${inf.percentualComissao ?? 0}% dos depósitos)</label><input type="number" min="0" step="0.01" id="lPago" class="input" value="${f.valorPago}" placeholder="${fmtBRL((p.totalDep * num(inf.percentualComissao)) / 100)}"><p style="margin:8px 0 0">Calculado automaticamente sobre a soma dos depósitos. Deixe vazio para usar o valor automático, ou informe para revisar.</p></div>`;
+      const deps = f.depositos.length
+        ? `<div class="dep-list">${f.depositos.map((d, i) => `<div class="dep-item"><input type="number" min="0" step="0.01" class="input dep-inp" data-i="${i}" value="${d}" placeholder="0,00"><button type="button" class="icon-btn del dep-del" data-i="${i}">${svg('trash')}</button></div>`).join('')}</div>`
+        : `<p class="muted" style="font-size:12px;margin:0">Nenhum depósito. Adicione se houver.</p>`;
+      const notaHoje = hojeLanc
+        ? `<div class="hint-box" style="border:1px solid color-mix(in srgb,var(--warning) 30%,transparent);background:var(--warning-soft);display:flex;gap:10px;align-items:flex-start"><span style="color:var(--warning)">${svg('info')}</span><div><b style="color:var(--text)">Já existe um lançamento de hoje para ${esc(inf.nome)}.</b><p style="margin:3px 0 8px">Se esses depósitos são do mesmo dia, adicione-os ao lançamento de hoje em vez de criar outro (evita cobrar o pagamento de novo).</p><button type="button" class="btn soft sm" id="lAbrirHoje">${svg('coins')} Adicionar depósito ao de hoje</button></div></div>`
+        : '';
+      return `<div class="modal-head"><h2>${ed ? 'Editar lançamento' : 'Novo lançamento'}</h2><p>${esc(inf.nome)} · modelo ${modelo}</p><button class="icon-btn modal-x" id="mX">${svg('close')}</button></div>
+      <div class="modal-body">
+        ${notaHoje}
+        <div class="form-row c3"><div class="field"><label>Data *</label><input type="date" id="lData" class="input" value="${f.data}" max="${hojeISO()}"></div><div class="field"><label>Cadastros gerados</label><input type="number" min="0" id="lCad" class="input" value="${f.cadastros}" placeholder="0"></div><div class="field"><label>Gastos extras (R$)</label><input type="number" min="0" step="0.01" id="lGas" class="input" value="${f.gastosExtras}" placeholder="0,00"></div></div>
+        ${espec}
+        <div class="box"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px"><label style="color:var(--text);font-size:13px;font-weight:600;margin:0">Depósitos do dia</label><button type="button" class="btn soft sm" id="lAddDep">${svg('plus')}Outro valor</button></div><p class="muted" style="font-size:12px;margin:0 0 10px">Toque nos valores a cada depósito que cair (ou "Outro valor" para digitar).</p><div class="chip-adds" style="margin-bottom:12px">${presetsDep().map((v) => `<button type="button" class="chip-add l-chip" data-v="${v}">+ R$ ${v}</button>`).join('')}</div>${deps}<p class="muted" style="font-size:12px;margin:10px 0 0">Soma dos depósitos: <b style="color:var(--text)" id="lSoma">${fmtBRL(p.totalDep)}</b></p></div>
+        <div class="form-row c3"><div class="field"><label>Receita bruta (R$)</label><input type="number" min="0" step="0.01" id="lBruta" class="input" value="${f.receitaBruta}" placeholder="0,00"><p class="muted" id="lBrutaHint" style="font-size:11px;margin:5px 0 0">${f.receitaBrutaManual ? 'Editada à mão. <button type="button" id="lBrutaAuto" style="background:none;border:none;color:var(--accent);font:inherit;font-size:11px;cursor:pointer;padding:0;text-decoration:underline">usar a soma dos depósitos</button>' : '= soma dos depósitos (edite se a plataforma considerar outro valor)'}</p></div><div class="field"><label>% aplicado (sua fatia)</label><input type="number" min="0" max="100" step="0.1" id="lPct" class="input" value="${f.percentualAplicado}"></div><div class="field"><label>Receita líquida</label><div class="readonly-val" id="lRecLiq" style="color:var(--accent)">${fmtBRL(p.recLiq)}</div></div></div>
+        <div class="lucro-preview"><div><div>Lucro do lançamento</div><div class="muted" style="font-size:12px">Receita líquida − valor pago − gastos extras</div></div><div class="big tnum ${p.lucro < 0 ? 'neg' : 'pos'}" id="lLucro">${fmtBRL(p.lucro)}</div></div>
+        <div class="field"><label>Observações</label><textarea class="textarea" id="lObs" placeholder="Notas do lançamento…">${esc(f.observacoes)}</textarea></div>
+        <div id="lErr"></div>
+      </div>
+      <div class="modal-foot"><button class="btn ghost" id="mCancel">Cancelar</button><button class="btn" id="mSave">${ed ? 'Salvar' : 'Adicionar lançamento'}</button></div>`;
+    };
+
+    const readScalars = () => {
+      const g = (id) => { const e = document.getElementById(id); return e ? e.value : undefined; };
+      f.data = g('lData'); f.cadastros = g('lCad'); f.gastosExtras = g('lGas'); f.receitaBruta = g('lBruta');
+      f.percentualAplicado = g('lPct'); f.observacoes = g('lObs') ?? f.observacoes;
+      if (g('lQtd') !== undefined) f.quantidadeStories = g('lQtd');
+      if (g('lCob') !== undefined) f.valorCobrado = g('lCob');
+      if (g('lPago') !== undefined) f.valorPago = g('lPago');
+    };
+    const updatePreview = () => {
+      const p = preview();
+      const set = (id, val) => { const e = document.getElementById(id); if (e) e.textContent = val; };
+      set('lSoma', fmtBRL(p.totalDep)); set('lRecLiq', fmtBRL(p.recLiq)); set('lCps', p.cps != null ? fmtBRL(p.cps) : '—');
+      const lu = document.getElementById('lLucro'); if (lu) { lu.textContent = fmtBRL(p.lucro); lu.className = 'big tnum ' + (p.lucro < 0 ? 'neg' : 'pos'); }
+    };
+    const rerender = () => { readScalars(); modalRoot.querySelector('.modal').innerHTML = render(); wire(); };
+    const addDepRow = () => { readScalars(); f.depositos.push(''); rerender(); const inps = modalRoot.querySelectorAll('.dep-inp'); const last = inps[inps.length - 1]; if (last) last.focus(); };
+    const wire = () => {
+      document.getElementById('mX').addEventListener('click', closeModal);
+      document.getElementById('mCancel').addEventListener('click', closeModal);
+      document.getElementById('mSave').addEventListener('click', salvar);
+      document.getElementById('lAddDep').addEventListener('click', addDepRow);
+      modalRoot.querySelectorAll('.l-chip').forEach((b) => b.addEventListener('click', () => { readScalars(); f.depositos.push(String(round2(num(b.dataset.v)))); syncReceita(); rerender(); }));
+      const abrirHoje = document.getElementById('lAbrirHoje');
+      if (abrirHoje) abrirHoje.addEventListener('click', () => { closeModal(); openQuickDeposito(inf, hojeLanc); });
+      modalRoot.querySelectorAll('.dep-inp').forEach((inp) => {
+        inp.addEventListener('input', (e) => { f.depositos[+e.target.dataset.i] = e.target.value; syncReceita(); updatePreview(); });
+        inp.addEventListener('keydown', (e) => { if (e.key === 'Enter') { e.preventDefault(); readScalars(); if (f.depositos[f.depositos.length - 1] !== '') addDepRow(); } });
+      });
+      modalRoot.querySelectorAll('.dep-del').forEach((b) => b.addEventListener('click', () => { readScalars(); f.depositos.splice(+b.dataset.i, 1); syncReceita(); rerender(); }));
+      const lBruta = document.getElementById('lBruta');
+      if (lBruta) lBruta.addEventListener('input', (e) => {
+        f.receitaBrutaManual = e.target.value.trim() !== '';
+        if (!f.receitaBrutaManual) syncReceita();
+        readScalars(); updatePreview();
+        const hint = document.getElementById('lBrutaHint');
+        if (hint) hint.innerHTML = f.receitaBrutaManual ? 'Editada à mão. <button type="button" id="lBrutaAuto" style="background:none;border:none;color:var(--accent);font:inherit;font-size:11px;cursor:pointer;padding:0;text-decoration:underline">usar a soma dos depósitos</button>' : '= soma dos depósitos (edite se a plataforma considerar outro valor)';
+        wireBrutaAuto();
+      });
+      wireBrutaAuto();
+      ['lPct', 'lGas', 'lCob', 'lQtd', 'lPago'].forEach((id) => { const e = document.getElementById(id); if (e) e.addEventListener('input', () => { readScalars(); updatePreview(); }); });
+    };
+    const wireBrutaAuto = () => {
+      const btn = document.getElementById('lBrutaAuto');
+      if (btn) btn.addEventListener('click', () => { f.receitaBrutaManual = false; syncReceita(); readScalars(); rerender(); });
+    };
+    const salvar = () => {
+      readScalars();
+      const err = document.getElementById('lErr');
+      if (!f.data) { err.innerHTML = `<div class="form-err">A data é obrigatória.</div>`; return; }
+      const depositos = f.depositos.map((v) => num(v)).filter((_, i) => f.depositos[i] !== '' && f.depositos[i] != null);
+      if (depositos.some((v) => v < 0)) { err.innerHTML = `<div class="form-err">Depósitos não podem ser negativos.</div>`; return; }
+      const input = { depositos, receitaBruta: Math.max(0, num(f.receitaBruta)), percentualAplicado: Math.max(0, num(f.percentualAplicado)), gastosExtras: Math.max(0, num(f.gastosExtras)) };
+      if (modelo === 'stories') { input.quantidadeStories = Math.max(0, Math.trunc(num(f.quantidadeStories))); input.valorCobrado = Math.max(0, num(f.valorCobrado)); }
+      if (modelo === 'fixo' || modelo === 'percentual') input.valorPago = f.valorPago === '' ? null : Math.max(0, num(f.valorPago));
+      const c = calcLanc(input, inf);
+      const rec = { influenciadorId: inf.id, data: f.data, cadastros: Math.max(0, Math.trunc(num(f.cadastros))), depositos, receitaBruta: c.receitaBruta, receitaBrutaManual: !!f.receitaBrutaManual, percentualAplicado: c.percentualAplicado, receitaLiquida: c.receitaLiquida, gastosExtras: c.gastosExtras, valorPago: c.valorPago, lucro: c.lucro, quantidadeStories: c.quantidadeStories, valorCobrado: c.valorCobrado, observacoes: (f.observacoes || '').trim() || null };
+      if (ed) { Object.assign(lanc, rec); } else { db.lancamentos.push({ id: db.seq++, criadoEm: new Date().toISOString(), ...rec }); }
+      save(); closeModal(); viewDetalhe(document.getElementById('main'), inf.id);
+    };
+    openModal(render());
+    wire();
+  }
+
+  // Recalcula um lançamento após anexar novos depósitos, respeitando o modelo.
+  function recalcComDepositos(lanc, inf, novos) {
+    const depositos = [...(lanc.depositos || []), ...novos];
+    // Se a receita bruta foi definida à mão (flag, ou dado antigo em que ela
+    // difere da soma), preserva-a; caso contrário acompanha a soma dos depósitos.
+    const manual = lanc.receitaBrutaManual != null
+      ? lanc.receitaBrutaManual
+      : (lanc.receitaBruta != null && Math.abs((lanc.receitaBruta || 0) - somaDep(lanc.depositos)) > 0.01);
+    const receitaBruta = manual ? lanc.receitaBruta : somaDep(depositos);
+    const input = { depositos, receitaBruta, percentualAplicado: lanc.percentualAplicado, gastosExtras: lanc.gastosExtras };
+    if (inf.modeloPagamento === 'stories') { input.quantidadeStories = lanc.quantidadeStories; input.valorCobrado = lanc.valorCobrado; }
+    else if (inf.modeloPagamento === 'fixo') input.valorPago = lanc.valorPago;
+    else input.valorPago = null; // percentual: recalcula sobre a nova soma
+    const c = calcLanc(input, inf);
+    Object.assign(lanc, { depositos, receitaBruta: c.receitaBruta, receitaLiquida: c.receitaLiquida, valorPago: c.valorPago, lucro: c.lucro });
+  }
+
+  /* ---- Adição rápida de depósitos (o dinheiro que cai ao longo do dia) ---- */
+  function openQuickDeposito(inf, lanc) {
+    const num = (v) => (v === '' || v == null ? 0 : Number(v) || 0);
+    let novos = [];      // depósitos já tocados/digitados nesta sessão (números)
+    let manual = '';     // valor avulso sendo digitado
+    const readManual = () => { const e = document.getElementById('qdManual'); if (e) manual = e.value; };
+    const commitManual = () => { readManual(); const v = round2(num(manual)); if (v > 0) { novos.push(v); manual = ''; } };
+
+    const render = () => {
+      const somaAtual = somaDep(lanc.depositos);
+      const somaNovos = round2(novos.reduce((a, v) => a + v, 0));
+      const chips = presetsDep().map((v) => `<button type="button" class="chip-add" data-v="${v}">+ R$ ${v}</button>`).join('');
+      const listaNovos = novos.length
+        ? `<div class="chip-adds" style="margin-top:12px">${novos.map((v, i) => `<span class="dep-chip">${fmtBRL(v)}<button type="button" class="qd-rm" data-i="${i}" aria-label="remover">${svg('close')}</button></span>`).join('')}</div>`
+        : `<p class="muted" style="font-size:12px;margin:12px 0 0">Toque nos valores acima a cada depósito que cair. A receita é montada sozinha.</p>`;
+      return `<div class="modal-head"><h2>Adicionar depósito</h2><p>${esc(inf.nome)} · lançamento de ${fmtData(lanc.data)}</p><button class="icon-btn modal-x" id="mX">${svg('close')}</button></div>
+      <div class="modal-body">
+        <div class="box" style="display:flex;justify-content:space-between;align-items:center"><span class="muted" style="font-size:13px">Depósitos já lançados (${(lanc.depositos || []).length})</span><b class="tnum">${fmtBRL(somaAtual)}</b></div>
+        <div>
+          <label style="color:var(--text);font-size:13px;font-weight:600;display:block;margin-bottom:9px">Toque para adicionar</label>
+          <div class="chip-adds">${chips}</div>
+          ${listaNovos}
+        </div>
+        <div class="field"><label>Outro valor</label>
+          <div style="display:flex;gap:8px"><input type="number" min="0" step="0.01" id="qdManual" class="input" value="${manual}" placeholder="Ex: 35,50"><button type="button" class="btn soft" id="qdManualAdd">${svg('plus')}Adicionar</button></div>
+        </div>
+        <div class="lucro-preview"><div><div>Novo total de depósitos</div><div class="muted" style="font-size:12px">${novos.length} novo(s) nesta sessão</div></div><div class="big tnum">${fmtBRL(somaAtual + somaNovos)}</div></div>
+        <div id="qdErr"></div>
+      </div>
+      <div class="modal-foot"><button class="btn ghost" id="mCancel">Cancelar</button><button class="btn" id="qdSave">${svg('coins')} Salvar ${novos.length ? novos.length + ' depósito' + (novos.length > 1 ? 's' : '') : ''}</button></div>`;
+    };
+    const rerender = (focusManual) => { modalRoot.querySelector('.modal').innerHTML = render(); wire(); if (focusManual) { const e = document.getElementById('qdManual'); if (e) { e.focus(); } } };
+    const wire = () => {
+      document.getElementById('mX').addEventListener('click', closeModal);
+      document.getElementById('mCancel').addEventListener('click', closeModal);
+      document.getElementById('qdSave').addEventListener('click', salvar);
+      modalRoot.querySelectorAll('.chip-add').forEach((b) => b.addEventListener('click', () => { readManual(); novos.push(round2(num(b.dataset.v))); rerender(); }));
+      modalRoot.querySelectorAll('.qd-rm').forEach((b) => b.addEventListener('click', () => { readManual(); novos.splice(+b.dataset.i, 1); rerender(); }));
+      const mi = document.getElementById('qdManual');
+      if (mi) {
+        mi.addEventListener('input', (e) => { manual = e.target.value; });
+        mi.addEventListener('keydown', (e) => { if (e.key === 'Enter') { e.preventDefault(); commitManual(); rerender(true); } });
+      }
+      document.getElementById('qdManualAdd').addEventListener('click', () => { commitManual(); rerender(true); });
+    };
+    const salvar = () => {
+      commitManual();
+      const err = document.getElementById('qdErr');
+      if (!novos.length) { err.innerHTML = `<div class="form-err">Toque em um valor ou digite um depósito antes de salvar.</div>`; return; }
+      recalcComDepositos(lanc, inf, novos);
+      save(); closeModal(); viewDetalhe(document.getElementById('main'), inf.id);
+    };
+    openModal(render());
+    wire();
+  }
+
+  /* ============================================================
+     Tema
+  ============================================================ */
+  const THEME_KEY = 'controle-igaming-theme';
+  function currentTheme() {
+    const attr = document.documentElement.getAttribute('data-theme');
+    if (attr) return attr;
+    return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+  }
+  function applyThemeButton() {
+    const t = currentTheme();
+    document.getElementById('themeIco').innerHTML = t === 'dark' ? I.sun : I.moon;
+    document.getElementById('themeLbl').textContent = t === 'dark' ? 'Modo claro' : 'Modo escuro';
+  }
+  try { const saved = localStorage.getItem(THEME_KEY); if (saved) document.documentElement.setAttribute('data-theme', saved); } catch (e) {}
+  document.getElementById('themeToggle').addEventListener('click', () => {
+    const next = currentTheme() === 'dark' ? 'light' : 'dark';
+    document.documentElement.setAttribute('data-theme', next);
+    try { localStorage.setItem(THEME_KEY, next); } catch (e) {}
+    applyThemeButton(); router();
+  });
+
+  /* ============================================================
+     Boot
+  ============================================================ */
+  window.addEventListener('hashchange', router);
+  window.addEventListener('resize', () => { responsiveCharts(); });
+  load();
+  applyThemeButton();
+  if (!location.hash) location.hash = '#/';
+  router();
+  initCloud();
+</script>
+
+</body>
+</html>
