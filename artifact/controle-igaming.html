@@ -1139,6 +1139,58 @@
     background: var(--accent-soft);
     color: var(--accent);
   }
+  /* Chips de valor rápido de depósito */
+  .chip-adds {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+  .chip-add {
+    border: 1.5px solid color-mix(in srgb, var(--accent) 35%, transparent);
+    background: var(--accent-soft);
+    color: var(--accent);
+    border-radius: 11px;
+    padding: 9px 14px;
+    font-size: 14px;
+    font-weight: 700;
+    transition: transform 0.1s, filter 0.12s;
+  }
+  .chip-add:hover {
+    filter: brightness(1.08);
+  }
+  .chip-add:active {
+    transform: scale(0.94);
+  }
+  .dep-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    border: 1px solid var(--border);
+    background: var(--surface-2);
+    border-radius: 999px;
+    padding: 6px 8px 6px 13px;
+    font-size: 13px;
+    font-weight: 600;
+    font-variant-numeric: tabular-nums;
+  }
+  .dep-chip button {
+    display: inline-grid;
+    place-items: center;
+    width: 18px;
+    height: 18px;
+    border: none;
+    border-radius: 999px;
+    background: transparent;
+    color: var(--muted);
+  }
+  .dep-chip button:hover {
+    background: var(--danger-soft);
+    color: var(--danger);
+  }
+  .dep-chip button svg {
+    width: 12px;
+    height: 12px;
+  }
   .deal-grid {
     display: grid;
     grid-template-columns: 1fr 1fr;
@@ -2411,7 +2463,7 @@
         ${notaHoje}
         <div class="form-row c3"><div class="field"><label>Data *</label><input type="date" id="lData" class="input" value="${f.data}" max="${hojeISO()}"></div><div class="field"><label>Cadastros gerados</label><input type="number" min="0" id="lCad" class="input" value="${f.cadastros}" placeholder="0"></div><div class="field"><label>Gastos extras (R$)</label><input type="number" min="0" step="0.01" id="lGas" class="input" value="${f.gastosExtras}" placeholder="0,00"></div></div>
         ${espec}
-        <div class="box"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px"><label style="color:var(--text);font-size:13px;font-weight:600;margin:0">Depósitos do dia</label><button type="button" class="btn soft sm" id="lAddDep">${svg('plus')}Depósito</button></div><p class="muted" style="font-size:12px;margin:0 0 10px">Adicione cada depósito que for caindo. Tecle Enter para lançar o próximo.</p>${deps}<p class="muted" style="font-size:12px;margin:10px 0 0">Soma dos depósitos: <b style="color:var(--text)" id="lSoma">${fmtBRL(p.totalDep)}</b></p></div>
+        <div class="box"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px"><label style="color:var(--text);font-size:13px;font-weight:600;margin:0">Depósitos do dia</label><button type="button" class="btn soft sm" id="lAddDep">${svg('plus')}Outro valor</button></div><p class="muted" style="font-size:12px;margin:0 0 10px">Toque nos valores a cada depósito que cair (ou "Outro valor" para digitar).</p><div class="chip-adds" style="margin-bottom:12px">${PRESETS_DEP.map((v) => `<button type="button" class="chip-add l-chip" data-v="${v}">+ R$ ${v}</button>`).join('')}</div>${deps}<p class="muted" style="font-size:12px;margin:10px 0 0">Soma dos depósitos: <b style="color:var(--text)" id="lSoma">${fmtBRL(p.totalDep)}</b></p></div>
         <div class="form-row c3"><div class="field"><label>Receita bruta (R$)</label><input type="number" min="0" step="0.01" id="lBruta" class="input" value="${f.receitaBruta}" placeholder="0,00"><p class="muted" id="lBrutaHint" style="font-size:11px;margin:5px 0 0">${f.receitaBrutaManual ? 'Editada à mão. <button type="button" id="lBrutaAuto" style="background:none;border:none;color:var(--accent);font:inherit;font-size:11px;cursor:pointer;padding:0;text-decoration:underline">usar a soma dos depósitos</button>' : '= soma dos depósitos (edite se a plataforma considerar outro valor)'}</p></div><div class="field"><label>% aplicado (sua fatia)</label><input type="number" min="0" max="100" step="0.1" id="lPct" class="input" value="${f.percentualAplicado}"></div><div class="field"><label>Receita líquida</label><div class="readonly-val" id="lRecLiq" style="color:var(--accent)">${fmtBRL(p.recLiq)}</div></div></div>
         <div class="lucro-preview"><div><div>Lucro do lançamento</div><div class="muted" style="font-size:12px">Receita líquida − valor pago − gastos extras</div></div><div class="big tnum ${p.lucro < 0 ? 'neg' : 'pos'}" id="lLucro">${fmtBRL(p.lucro)}</div></div>
         <div class="field"><label>Observações</label><textarea class="textarea" id="lObs" placeholder="Notas do lançamento…">${esc(f.observacoes)}</textarea></div>
@@ -2441,6 +2493,7 @@
       document.getElementById('mCancel').addEventListener('click', closeModal);
       document.getElementById('mSave').addEventListener('click', salvar);
       document.getElementById('lAddDep').addEventListener('click', addDepRow);
+      modalRoot.querySelectorAll('.l-chip').forEach((b) => b.addEventListener('click', () => { readScalars(); f.depositos.push(String(round2(num(b.dataset.v)))); syncReceita(); rerender(); }));
       const abrirHoje = document.getElementById('lAbrirHoje');
       if (abrirHoje) abrirHoje.addEventListener('click', () => { closeModal(); openQuickDeposito(inf, hojeLanc); });
       modalRoot.querySelectorAll('.dep-inp').forEach((inp) => {
@@ -2500,51 +2553,60 @@
   }
 
   /* ---- Adição rápida de depósitos (o dinheiro que cai ao longo do dia) ---- */
+  const PRESETS_DEP = [20, 30, 40, 50, 70, 100];
   function openQuickDeposito(inf, lanc) {
     const num = (v) => (v === '' || v == null ? 0 : Number(v) || 0);
-    let novos = [''];
+    let novos = [];      // depósitos já tocados/digitados nesta sessão (números)
+    let manual = '';     // valor avulso sendo digitado
+    const readManual = () => { const e = document.getElementById('qdManual'); if (e) manual = e.value; };
+    const commitManual = () => { readManual(); const v = round2(num(manual)); if (v > 0) { novos.push(v); manual = ''; } };
+
     const render = () => {
       const somaAtual = somaDep(lanc.depositos);
-      const somaNovos = round2(novos.reduce((a, v) => a + num(v), 0));
-      const rows = novos.map((d, i) => `<div class="dep-item"><input type="number" min="0" step="0.01" class="input qd-inp" data-i="${i}" value="${d}" placeholder="0,00"><button type="button" class="icon-btn del qd-del" data-i="${i}">${svg('trash')}</button></div>`).join('');
+      const somaNovos = round2(novos.reduce((a, v) => a + v, 0));
+      const chips = PRESETS_DEP.map((v) => `<button type="button" class="chip-add" data-v="${v}">+ R$ ${v}</button>`).join('');
+      const listaNovos = novos.length
+        ? `<div class="chip-adds" style="margin-top:12px">${novos.map((v, i) => `<span class="dep-chip">${fmtBRL(v)}<button type="button" class="qd-rm" data-i="${i}" aria-label="remover">${svg('close')}</button></span>`).join('')}</div>`
+        : `<p class="muted" style="font-size:12px;margin:12px 0 0">Toque nos valores acima a cada depósito que cair. A receita é montada sozinha.</p>`;
       return `<div class="modal-head"><h2>Adicionar depósito</h2><p>${esc(inf.nome)} · lançamento de ${fmtData(lanc.data)}</p><button class="icon-btn modal-x" id="mX">${svg('close')}</button></div>
       <div class="modal-body">
-        <div class="box" style="display:flex;justify-content:space-between;align-items:center"><span class="muted" style="font-size:13px">Depósitos já lançados hoje (${(lanc.depositos || []).length})</span><b class="tnum">${fmtBRL(somaAtual)}</b></div>
+        <div class="box" style="display:flex;justify-content:space-between;align-items:center"><span class="muted" style="font-size:13px">Depósitos já lançados (${(lanc.depositos || []).length})</span><b class="tnum">${fmtBRL(somaAtual)}</b></div>
         <div>
-          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px"><label style="color:var(--text);font-size:13px;font-weight:600;margin:0">Novos depósitos</label><button type="button" class="btn soft sm" id="qdAdd">${svg('plus')}Mais um</button></div>
-          <div class="dep-list">${rows}</div>
-          <p class="muted" style="font-size:12px;margin:10px 0 0">Tecle Enter para lançar o próximo. Novo total: <b style="color:var(--text)" class="tnum">${fmtBRL(somaAtual + somaNovos)}</b></p>
+          <label style="color:var(--text);font-size:13px;font-weight:600;display:block;margin-bottom:9px">Toque para adicionar</label>
+          <div class="chip-adds">${chips}</div>
+          ${listaNovos}
         </div>
+        <div class="field"><label>Outro valor</label>
+          <div style="display:flex;gap:8px"><input type="number" min="0" step="0.01" id="qdManual" class="input" value="${manual}" placeholder="Ex: 35,50"><button type="button" class="btn soft" id="qdManualAdd">${svg('plus')}Adicionar</button></div>
+        </div>
+        <div class="lucro-preview"><div><div>Novo total de depósitos</div><div class="muted" style="font-size:12px">${novos.length} novo(s) nesta sessão</div></div><div class="big tnum">${fmtBRL(somaAtual + somaNovos)}</div></div>
         <div id="qdErr"></div>
       </div>
-      <div class="modal-foot"><button class="btn ghost" id="mCancel">Cancelar</button><button class="btn" id="qdSave">${svg('coins')} Adicionar</button></div>`;
+      <div class="modal-foot"><button class="btn ghost" id="mCancel">Cancelar</button><button class="btn" id="qdSave">${svg('coins')} Salvar ${novos.length ? novos.length + ' depósito' + (novos.length > 1 ? 's' : '') : ''}</button></div>`;
     };
-    const readRows = () => { modalRoot.querySelectorAll('.qd-inp').forEach((e) => { novos[+e.dataset.i] = e.value; }); };
-    const rerender = () => { modalRoot.querySelector('.modal').innerHTML = render(); wire(); };
-    const addRow = () => { readRows(); novos.push(''); rerender(); const inps = modalRoot.querySelectorAll('.qd-inp'); inps[inps.length - 1]?.focus(); };
+    const rerender = (focusManual) => { modalRoot.querySelector('.modal').innerHTML = render(); wire(); if (focusManual) { const e = document.getElementById('qdManual'); if (e) { e.focus(); } } };
     const wire = () => {
       document.getElementById('mX').addEventListener('click', closeModal);
       document.getElementById('mCancel').addEventListener('click', closeModal);
-      document.getElementById('qdAdd').addEventListener('click', addRow);
-      modalRoot.querySelectorAll('.qd-inp').forEach((inp) => {
-        inp.addEventListener('input', (e) => { novos[+e.target.dataset.i] = e.target.value; const t = modalRoot.querySelector('.dep-list'); readRows(); const somaAtual = somaDep(lanc.depositos); const somaNovos = round2(novos.reduce((a, v) => a + num(v), 0)); const b = modalRoot.querySelector('.modal-body p b'); if (b) b.textContent = fmtBRL(somaAtual + somaNovos); });
-        inp.addEventListener('keydown', (e) => { if (e.key === 'Enter') { e.preventDefault(); readRows(); if (novos[novos.length - 1] !== '') addRow(); } });
-      });
-      modalRoot.querySelectorAll('.qd-del').forEach((b) => b.addEventListener('click', () => { readRows(); novos.splice(+b.dataset.i, 1); if (!novos.length) novos = ['']; rerender(); }));
       document.getElementById('qdSave').addEventListener('click', salvar);
+      modalRoot.querySelectorAll('.chip-add').forEach((b) => b.addEventListener('click', () => { readManual(); novos.push(round2(num(b.dataset.v))); rerender(); }));
+      modalRoot.querySelectorAll('.qd-rm').forEach((b) => b.addEventListener('click', () => { readManual(); novos.splice(+b.dataset.i, 1); rerender(); }));
+      const mi = document.getElementById('qdManual');
+      if (mi) {
+        mi.addEventListener('input', (e) => { manual = e.target.value; });
+        mi.addEventListener('keydown', (e) => { if (e.key === 'Enter') { e.preventDefault(); commitManual(); rerender(true); } });
+      }
+      document.getElementById('qdManualAdd').addEventListener('click', () => { commitManual(); rerender(true); });
     };
     const salvar = () => {
-      readRows();
-      const vals = novos.map(num).filter((_, i) => novos[i] !== '' && novos[i] != null);
+      commitManual();
       const err = document.getElementById('qdErr');
-      if (!vals.length) { err.innerHTML = `<div class="form-err">Informe ao menos um valor de depósito.</div>`; return; }
-      if (vals.some((v) => v < 0)) { err.innerHTML = `<div class="form-err">Depósitos não podem ser negativos.</div>`; return; }
-      recalcComDepositos(lanc, inf, vals);
+      if (!novos.length) { err.innerHTML = `<div class="form-err">Toque em um valor ou digite um depósito antes de salvar.</div>`; return; }
+      recalcComDepositos(lanc, inf, novos);
       save(); closeModal(); viewDetalhe(document.getElementById('main'), inf.id);
     };
     openModal(render());
     wire();
-    setTimeout(() => { const i = modalRoot.querySelector('.qd-inp'); if (i) i.focus(); }, 30);
   }
 
   /* ============================================================
