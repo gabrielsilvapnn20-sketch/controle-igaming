@@ -2069,6 +2069,7 @@
     const lancs = lancsDe(id);
     const m = metricas(lancs);
     const dicas = gerarDicas(lancs, m);
+    const lancHoje = lancs.find((l) => l.data === hojeISO());
     const dias = inf.dataInicio ? Math.max(0, Math.floor((new Date(hojeISO() + 'T00:00:00') - new Date(inf.dataInicio + 'T00:00:00')) / 86400000)) : null;
     const serie = lancs.map((l) => ({ data: l.data, lucro: l.lucro }));
 
@@ -2106,12 +2107,15 @@
               <div class="chips muted" style="font-size:12px;margin-top:8px;gap:14px">${metaChips.map((c) => `<span class="chips" style="gap:5px">${c}</span>`).join('')}</div>
             </div>
           </div>
-          <div style="display:flex;gap:8px;align-items:center">
+          <div style="display:flex;flex-wrap:wrap;gap:8px;align-items:center;justify-content:flex-end">
             <button class="btn ghost sm" id="editInf">${svg('pencil')}Editar</button>
             <button class="icon-btn del" id="delInf">${svg('trash')}</button>
-            <button class="btn" id="novoLanc">${svg('plus')}Novo lançamento</button>
+            ${lancHoje
+              ? `<button class="btn ghost sm" id="novoLanc">${svg('plus')}Novo lançamento</button><button class="btn" id="depHoje">${svg('coins')} Depósito de hoje</button>`
+              : `<button class="btn" id="novoLanc">${svg('plus')}Novo lançamento</button>`}
           </div>
         </div>
+        ${lancHoje ? `<div class="box" style="margin-top:16px;display:flex;flex-wrap:wrap;gap:10px;justify-content:space-between;align-items:center;border-color:color-mix(in srgb,var(--accent) 25%,transparent);background:var(--accent-soft)"><div style="font-size:13px"><b>Já há um lançamento hoje</b> · ${fmtBRL(somaDep(lancHoje.depositos))} em ${lancHoje.depositos.length} depósito(s). <span class="muted">Some os novos depósitos aqui — não crie outro lançamento (evita cobrar o pagamento de novo).</span></div><button class="btn soft sm" id="depHoje2">${svg('coins')} Adicionar depósito</button></div>` : ''}
         ${inf.observacoes ? `<div class="box" style="margin-top:16px;color:var(--muted)">${esc(inf.observacoes)}</div>` : ''}
       </div>
 
@@ -2136,7 +2140,7 @@
       <div class="card" style="margin-top:16px">
         <div class="card-head" style="display:flex;justify-content:space-between;align-items:center">
           <div><h3>Histórico de lançamentos</h3><p>${m.qtdLancamentos} lançamento(s) registrado(s)</p></div>
-          <button class="btn soft sm" id="addLanc">${svg('plus')}Adicionar</button>
+          <button class="btn ghost sm" id="addLanc">${svg('plus')}Novo lançamento</button>
         </div>
         ${lancs.length ? `<div class="tbl-wrap"><table><thead><tr>
           <th>Data</th><th class="ta-r">Cadastros</th><th class="ta-r">Depósitos</th><th class="ta-r">Rec. líquida</th><th class="ta-r">%</th><th class="ta-r">Pago</th><th class="ta-r">Lucro</th><th class="ta-r">Ações</th>
@@ -2158,6 +2162,7 @@
     }));
     document.getElementById('novoLanc').addEventListener('click', () => openLancForm(inf, null));
     document.getElementById('addLanc').addEventListener('click', () => openLancForm(inf, null));
+    ['depHoje', 'depHoje2'].forEach((bid) => { const b = document.getElementById(bid); if (b) b.addEventListener('click', () => openQuickDeposito(inf, lancHoje)); });
     main.querySelectorAll('[data-dep]').forEach((b) => b.addEventListener('click', () => openQuickDeposito(inf, db.lancamentos.find((l) => l.id === +b.dataset.dep))));
     main.querySelectorAll('[data-edit]').forEach((b) => b.addEventListener('click', () => openLancForm(inf, db.lancamentos.find((l) => l.id === +b.dataset.edit))));
     main.querySelectorAll('[data-del]').forEach((b) => b.addEventListener('click', () => {
