@@ -1,0 +1,15 @@
+# Configuração do Netlify.
+# O app para publicação estática é a versão standalone em static/index.html
+# (funciona sem servidor — salva no navegador, com backup em Configurações).
+# Não fazemos build do app React full-stack aqui: ele depende de um backend
+# próprio e por isso não funciona em hospedagem estática como o Netlify.
+
+[build]
+  command = "echo 'Sem build: publicando o app standalone em static/'"
+  publish = "static"
+
+# Como o app usa rotas por hash (#/...), qualquer caminho serve o index.html.
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200
