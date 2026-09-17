@@ -2088,7 +2088,7 @@
     const linhas = [...lancs].sort((a, b) => b.data.localeCompare(a.data)).map((l) => `
       <tr><td style="font-weight:600">${fmtData(l.data)}</td>
         <td class="ta-r tnum">${fmtNum(l.cadastros)}</td>
-        <td class="ta-r tnum">${fmtBRL(somaDep(l.depositos))} <span class="muted" style="font-size:11px">(${l.depositos.length})</span></td>
+        <td class="ta-r tnum">${fmtBRL(l.receitaBruta)}${l.depositos.length ? ` <span class="muted" style="font-size:11px">(${l.depositos.length} dep.)</span>` : ''}</td>
         <td class="ta-r tnum">${fmtBRL(l.receitaLiquida)}</td>
         <td class="ta-r tnum muted">${fmtPct(l.percentualAplicado)}</td>
         <td class="ta-r tnum warn">${fmtBRL(l.valorPago)}</td>
@@ -2125,7 +2125,7 @@
         ${metric(m.lucro < 0 ? 'Prejuízo' : 'Lucro', fmtBRL(m.lucro), 'trendUp', m.lucro < 0 ? 'var(--danger)' : 'var(--success)')}
         ${metric('ROI', fmtPct(m.roi), 'target')}
         ${metric('Cadastros totais', fmtNum(m.cadastrosTotais), 'users')}
-        ${metric('Depósitos totais', fmtBRL(m.depositosTotais), 'coins')}
+        ${metric('Bruto total (entrou)', fmtBRL(m.receitaBrutaTotal), 'coins')}
         ${metric('Custo / cadastro', m.custoPorCadastro != null ? fmtBRL(m.custoPorCadastro) : '—', 'target')}
         ${inf.modeloPagamento === 'stories' ? metric('Custo médio / story', m.custoMedioPorStory != null ? fmtBRL(m.custoMedioPorStory) : '—', 'film') : metric('Gastos extras', fmtBRL(m.gastosExtrasTotal), 'coins')}
       </div>
@@ -2143,7 +2143,7 @@
           <button class="btn ghost sm" id="addLanc">${svg('plus')}Novo lançamento</button>
         </div>
         ${lancs.length ? `<div class="tbl-wrap"><table><thead><tr>
-          <th>Data</th><th class="ta-r">Cadastros</th><th class="ta-r">Depósitos</th><th class="ta-r">Rec. líquida</th><th class="ta-r">%</th><th class="ta-r">Pago</th><th class="ta-r">Lucro</th><th class="ta-r">Ações</th>
+          <th>Data</th><th class="ta-r">Cadastros</th><th class="ta-r">Bruto (entrou)</th><th class="ta-r">Rec. líquida</th><th class="ta-r">%</th><th class="ta-r">Pago</th><th class="ta-r">Lucro</th><th class="ta-r">Ações</th>
         </tr></thead><tbody>${linhas}</tbody></table></div>`
           : emptyState('inbox', 'Nenhum lançamento', 'Registre o primeiro lançamento desta parceria.')}
       </div>
