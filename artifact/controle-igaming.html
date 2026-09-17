@@ -1513,7 +1513,7 @@
       { nome: 'Elisa Faria', instagram: '@elisafaria', status: 'negociando', dataInicio: iso(10), modeloPagamento: 'stories', valorPorStory: 90, qtdStoriesPadrao: 2, diasDivulgacao: 5, observacoes: 'Em fase de teste.' },
     ];
     const now = new Date().toISOString();
-    db = { config: { minhaParticipacao: 80, atualizadoEm: now }, configHistorico: [], influenciadores: [], lancamentos: [], seq: 1, exemplo: true, updatedAt: 0 };
+    db = { config: { minhaParticipacao: 80, atualizadoEm: now }, configHistorico: [], influenciadores: [], lancamentos: [], seq: 1, exemplo: true, updatedAt: 0, presetsDeposito: [20, 30, 40, 50, 70, 100] };
     const rand = (a, b) => Math.round(a + Math.random() * (b - a));
     infs.forEach((inf) => {
       const id = db.seq++;
@@ -1555,9 +1555,12 @@
     persistLocal();
   }
   function normalize() {
-    if (!db || !Array.isArray(db.lancamentos)) return;
+    if (!db) return;
+    if (!Array.isArray(db.presetsDeposito) || !db.presetsDeposito.length) db.presetsDeposito = [20, 30, 40, 50, 70, 100];
+    if (!Array.isArray(db.lancamentos)) return;
     db.lancamentos.forEach((l) => { if (l.lucro == null || isNaN(l.lucro)) l.lucro = lucroLanc(l); });
   }
+  const presetsDep = () => (Array.isArray(db.presetsDeposito) && db.presetsDeposito.length ? db.presetsDeposito : [20, 30, 40, 50, 70, 100]);
   function persistLocal() {
     try { localStorage.setItem(KEY, JSON.stringify(db)); } catch (e) {}
   }
@@ -2242,6 +2245,14 @@
         </div>
       </div>
 
+      <div class="card" style="margin-top:16px"><div class="card-head"><h3>${svg('coins')} Valores rápidos de depósito</h3><p>Os botões que aparecem ao lançar depósitos. Deixe só os valores que você mais usa.</p></div>
+        <div class="card-pad" style="display:flex;flex-direction:column;gap:14px">
+          <div class="chip-adds" id="presetChips">${presetsDep().map((v, i) => `<span class="dep-chip">R$ ${v}<button type="button" class="preset-rm" data-i="${i}" aria-label="remover">${svg('close')}</button></span>`).join('')}</div>
+          <div class="field" style="max-width:320px"><label>Adicionar um valor (R$)</label><div style="display:flex;gap:8px"><input type="number" min="0" step="1" id="presetNew" class="input" placeholder="Ex: 200"><button class="btn soft" id="presetAdd">${svg('plus')}Adicionar</button></div></div>
+          <div id="presetMsg"></div>
+        </div>
+      </div>
+
       <div class="card" style="margin-top:16px"><div class="card-head"><h3>${svg('save')} Backup dos dados</h3><p>${SYNC.on ? 'Seus dados já ficam salvos na sua conta e sincronizam entre dispositivos. Ainda assim, dá pra guardar uma cópia.' : 'Guarde uma cópia dos seus dados para não perder nada (útil ao trocar de navegador ou dispositivo).'}</p></div>
         <div class="card-pad" style="display:flex;flex-direction:column;gap:14px">
           <div style="display:flex;flex-wrap:wrap;gap:10px">
@@ -2256,6 +2267,26 @@
     </div>`;
     const row = document.getElementById('cfgRow');
     if (row && window.innerWidth < 720) row.style.gridTemplateColumns = '1fr';
+
+    const addPreset = () => {
+      const inp = document.getElementById('presetNew');
+      const msg = document.getElementById('presetMsg');
+      const v = Math.round(Number(inp.value));
+      if (!v || v <= 0) { msg.innerHTML = `<div class="form-err">Informe um valor maior que zero.</div>`; return; }
+      const atual = presetsDep();
+      if (atual.includes(v)) { msg.innerHTML = `<div class="form-err">Esse valor já está na lista.</div>`; return; }
+      if (atual.length >= 12) { msg.innerHTML = `<div class="form-err">Máximo de 12 valores.</div>`; return; }
+      db.presetsDeposito = [...atual, v].sort((a, b) => a - b);
+      save(); viewConfig(main);
+    };
+    document.querySelectorAll('.preset-rm').forEach((b) => b.addEventListener('click', () => {
+      const atual = presetsDep();
+      if (atual.length <= 1) { document.getElementById('presetMsg').innerHTML = `<div class="form-err">Deixe ao menos um valor.</div>`; return; }
+      db.presetsDeposito = atual.filter((_, i) => i !== +b.dataset.i);
+      save(); viewConfig(main);
+    }));
+    document.getElementById('presetAdd').addEventListener('click', addPreset);
+    document.getElementById('presetNew').addEventListener('keydown', (e) => { if (e.key === 'Enter') { e.preventDefault(); addPreset(); } });
 
     document.getElementById('btnExport').addEventListener('click', async () => {
       const json = JSON.stringify(db);
@@ -2463,7 +2494,7 @@
         ${notaHoje}
         <div class="form-row c3"><div class="field"><label>Data *</label><input type="date" id="lData" class="input" value="${f.data}" max="${hojeISO()}"></div><div class="field"><label>Cadastros gerados</label><input type="number" min="0" id="lCad" class="input" value="${f.cadastros}" placeholder="0"></div><div class="field"><label>Gastos extras (R$)</label><input type="number" min="0" step="0.01" id="lGas" class="input" value="${f.gastosExtras}" placeholder="0,00"></div></div>
         ${espec}
-        <div class="box"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px"><label style="color:var(--text);font-size:13px;font-weight:600;margin:0">Depósitos do dia</label><button type="button" class="btn soft sm" id="lAddDep">${svg('plus')}Outro valor</button></div><p class="muted" style="font-size:12px;margin:0 0 10px">Toque nos valores a cada depósito que cair (ou "Outro valor" para digitar).</p><div class="chip-adds" style="margin-bottom:12px">${PRESETS_DEP.map((v) => `<button type="button" class="chip-add l-chip" data-v="${v}">+ R$ ${v}</button>`).join('')}</div>${deps}<p class="muted" style="font-size:12px;margin:10px 0 0">Soma dos depósitos: <b style="color:var(--text)" id="lSoma">${fmtBRL(p.totalDep)}</b></p></div>
+        <div class="box"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px"><label style="color:var(--text);font-size:13px;font-weight:600;margin:0">Depósitos do dia</label><button type="button" class="btn soft sm" id="lAddDep">${svg('plus')}Outro valor</button></div><p class="muted" style="font-size:12px;margin:0 0 10px">Toque nos valores a cada depósito que cair (ou "Outro valor" para digitar).</p><div class="chip-adds" style="margin-bottom:12px">${presetsDep().map((v) => `<button type="button" class="chip-add l-chip" data-v="${v}">+ R$ ${v}</button>`).join('')}</div>${deps}<p class="muted" style="font-size:12px;margin:10px 0 0">Soma dos depósitos: <b style="color:var(--text)" id="lSoma">${fmtBRL(p.totalDep)}</b></p></div>
         <div class="form-row c3"><div class="field"><label>Receita bruta (R$)</label><input type="number" min="0" step="0.01" id="lBruta" class="input" value="${f.receitaBruta}" placeholder="0,00"><p class="muted" id="lBrutaHint" style="font-size:11px;margin:5px 0 0">${f.receitaBrutaManual ? 'Editada à mão. <button type="button" id="lBrutaAuto" style="background:none;border:none;color:var(--accent);font:inherit;font-size:11px;cursor:pointer;padding:0;text-decoration:underline">usar a soma dos depósitos</button>' : '= soma dos depósitos (edite se a plataforma considerar outro valor)'}</p></div><div class="field"><label>% aplicado (sua fatia)</label><input type="number" min="0" max="100" step="0.1" id="lPct" class="input" value="${f.percentualAplicado}"></div><div class="field"><label>Receita líquida</label><div class="readonly-val" id="lRecLiq" style="color:var(--accent)">${fmtBRL(p.recLiq)}</div></div></div>
         <div class="lucro-preview"><div><div>Lucro do lançamento</div><div class="muted" style="font-size:12px">Receita líquida − valor pago − gastos extras</div></div><div class="big tnum ${p.lucro < 0 ? 'neg' : 'pos'}" id="lLucro">${fmtBRL(p.lucro)}</div></div>
         <div class="field"><label>Observações</label><textarea class="textarea" id="lObs" placeholder="Notas do lançamento…">${esc(f.observacoes)}</textarea></div>
@@ -2553,7 +2584,6 @@
   }
 
   /* ---- Adição rápida de depósitos (o dinheiro que cai ao longo do dia) ---- */
-  const PRESETS_DEP = [20, 30, 40, 50, 70, 100];
   function openQuickDeposito(inf, lanc) {
     const num = (v) => (v === '' || v == null ? 0 : Number(v) || 0);
     let novos = [];      // depósitos já tocados/digitados nesta sessão (números)
@@ -2564,7 +2594,7 @@
     const render = () => {
       const somaAtual = somaDep(lanc.depositos);
       const somaNovos = round2(novos.reduce((a, v) => a + v, 0));
-      const chips = PRESETS_DEP.map((v) => `<button type="button" class="chip-add" data-v="${v}">+ R$ ${v}</button>`).join('');
+      const chips = presetsDep().map((v) => `<button type="button" class="chip-add" data-v="${v}">+ R$ ${v}</button>`).join('');
       const listaNovos = novos.length
         ? `<div class="chip-adds" style="margin-top:12px">${novos.map((v, i) => `<span class="dep-chip">${fmtBRL(v)}<button type="button" class="qd-rm" data-i="${i}" aria-label="remover">${svg('close')}</button></span>`).join('')}</div>`
         : `<p class="muted" style="font-size:12px;margin:12px 0 0">Toque nos valores acima a cada depósito que cair. A receita é montada sozinha.</p>`;
