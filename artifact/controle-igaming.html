@@ -1179,6 +1179,31 @@
     color: var(--accent);
   }
 
+  .sync-tag {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 12px;
+    font-weight: 600;
+    padding: 5px 11px;
+    border-radius: 999px;
+    border: 1px solid;
+  }
+  .sync-tag svg {
+    width: 13px;
+    height: 13px;
+  }
+  .sync-tag.ok {
+    color: var(--success);
+    background: var(--success-soft);
+    border-color: color-mix(in srgb, var(--success) 30%, transparent);
+  }
+  .sync-tag.warn2 {
+    color: var(--warning);
+    background: var(--warning-soft);
+    border-color: color-mix(in srgb, var(--warning) 30%, transparent);
+  }
+
   /* Chart */
   .chart {
     width: 100%;
@@ -1436,7 +1461,7 @@
       { nome: 'Elisa Faria', instagram: '@elisafaria', status: 'negociando', dataInicio: iso(10), modeloPagamento: 'stories', valorPorStory: 90, qtdStoriesPadrao: 2, diasDivulgacao: 5, observacoes: 'Em fase de teste.' },
     ];
     const now = new Date().toISOString();
-    db = { config: { minhaParticipacao: 80, atualizadoEm: now }, configHistorico: [], influenciadores: [], lancamentos: [], seq: 1, exemplo: true };
+    db = { config: { minhaParticipacao: 80, atualizadoEm: now }, configHistorico: [], influenciadores: [], lancamentos: [], seq: 1, exemplo: true, updatedAt: 0 };
     const rand = (a, b) => Math.round(a + Math.random() * (b - a));
     infs.forEach((inf) => {
       const id = db.seq++;
@@ -1464,18 +1489,121 @@
   function load() {
     try {
       const raw = localStorage.getItem(KEY);
-      if (raw) { db = JSON.parse(raw); normalize(); return; }
+      if (raw) {
+        db = JSON.parse(raw);
+        // Dados já existentes no navegador são tratados como reais (para não
+        // serem sobrescritos por um dispositivo recém-aberto com exemplos).
+        if (db.updatedAt == null) db.updatedAt = Date.now();
+        normalize();
+        return;
+      }
     } catch (e) {}
     seed();
     normalize();
-    save();
+    persistLocal();
   }
   function normalize() {
     if (!db || !Array.isArray(db.lancamentos)) return;
     db.lancamentos.forEach((l) => { if (l.lucro == null || isNaN(l.lucro)) l.lucro = lucroLanc(l); });
   }
-  function save() {
+  function persistLocal() {
     try { localStorage.setItem(KEY, JSON.stringify(db)); } catch (e) {}
+  }
+  function save() {
+    db.updatedAt = Date.now();
+    persistLocal();
+    scheduleCloudWrite();
+  }
+
+  /* ============================================================
+     Sincronização com a conta (capability db) — salva na nuvem e
+     acompanha entre dispositivos. localStorage segue como cache offline.
+  ============================================================ */
+  const SYNC = { on: false, ready: false };
+  let cloudRef = null;
+  let writeTimer = null, writing = false, pendingWrite = false, remoteStash = null;
+
+  function scheduleCloudWrite() {
+    if (!cloudRef) return;
+    pendingWrite = true;
+    if (writeTimer) return;
+    writeTimer = setTimeout(flushCloudWrite, 500);
+  }
+  async function flushCloudWrite() {
+    writeTimer = null;
+    if (writing || !pendingWrite || !cloudRef) return;
+    pendingWrite = false;
+    writing = true;
+    try {
+      await cloudRef.set(JSON.parse(JSON.stringify(db)));
+    } catch (e) {
+      // falha transitória: mantém no cache local e tenta de novo depois
+      pendingWrite = true;
+    } finally {
+      writing = false;
+      if (pendingWrite) scheduleCloudWrite();
+    }
+  }
+
+  function adotarRemoto(remoto) {
+    // Aplica um estado vindo da nuvem sobre o local, sem re-gravar.
+    db = remoto;
+    if (db.updatedAt == null) db.updatedAt = Date.now();
+    normalize();
+    persistLocal();
+    if (modalRoot.children.length) { remoteStash = null; return; } // não interromper edição em modal
+    router();
+  }
+
+  function reconciliar(remoto) {
+    const rUp = remoto && typeof remoto.updatedAt === 'number' ? remoto.updatedAt : -1;
+    const lUp = typeof db.updatedAt === 'number' ? db.updatedAt : 0;
+    if (remoto && rUp > lUp) {
+      // Nuvem mais recente → adota (se um modal estiver aberto, guarda p/ depois)
+      if (modalRoot.children.length) remoteStash = remoto;
+      else adotarRemoto(remoto);
+    } else if (lUp > 0 && rUp < lUp) {
+      // Local real e mais novo (inclui nuvem vazia) → envia p/ nuvem
+      scheduleCloudWrite();
+    }
+  }
+
+  async function initCloud() {
+    let dbCap = null;
+    try {
+      const c = window.claude;
+      dbCap = c && typeof c.use === 'function' ? await c.use('db') : null;
+    } catch (e) { dbCap = null; }
+    if (!dbCap) { updateSyncUI(); return; } // sem conta/preview → só local
+    try {
+      cloudRef = dbCap.doc('estado/app');
+      const snap = await cloudRef.get();
+      reconciliar(snap.exists ? snap.data() : null);
+      SYNC.on = true;
+      SYNC.ready = true;
+      updateSyncUI();
+      // Escuta mudanças de outros dispositivos.
+      cloudRef.onSnapshot((s) => {
+        if (!s.exists) return;
+        const remoto = s.data();
+        if (typeof remoto.updatedAt === 'number' && remoto.updatedAt > (db.updatedAt || 0)) {
+          if (modalRoot.children.length) remoteStash = remoto;
+          else adotarRemoto(remoto);
+        }
+      }, () => {});
+    } catch (e) {
+      cloudRef = null;
+      updateSyncUI();
+    }
+  }
+
+  function updateSyncUI() {
+    document.querySelectorAll('[data-sync]').forEach((el) => {
+      el.innerHTML = SYNC.on
+        ? `${svg('check')} Sincronizado com sua conta`
+        : `${svg('info')} Salvando só neste navegador`;
+      el.className = 'sync-tag ' + (SYNC.on ? 'ok' : 'warn2');
+    });
   }
 
   /* ============================================================
@@ -2040,7 +2168,7 @@
     const c = db.config;
     const hist = [...db.configHistorico].sort((a, b) => b.alteradoEm.localeCompare(a.alteradoEm));
     main.innerHTML = `<div class="view">
-      ${head('Configurações', 'Parâmetros globais da agência', '')}
+      ${head('Configurações', 'Parâmetros globais da agência', `<span data-sync class="sync-tag ${SYNC.on ? 'ok' : 'warn2'}">${SYNC.on ? svg('check') + ' Sincronizado com sua conta' : svg('info') + ' Salvando só neste navegador'}</span>`)}
       <div class="grid" style="grid-template-columns:1fr 1fr" id="cfgRow">
         <div class="card"><div class="card-head"><h3>${svg('percent')} Sua participação global</h3><p>Percentual da receita bruta que fica com a agência (o restante é do dono da plataforma).</p></div>
           <div class="card-pad" style="display:flex;flex-direction:column;gap:14px">
@@ -2060,9 +2188,52 @@
             : emptyState('history', 'Sem alterações', 'As mudanças no percentual aparecerão aqui.')}</div>
         </div>
       </div>
+
+      <div class="card" style="margin-top:16px"><div class="card-head"><h3>${svg('save')} Backup dos dados</h3><p>${SYNC.on ? 'Seus dados já ficam salvos na sua conta e sincronizam entre dispositivos. Ainda assim, dá pra guardar uma cópia.' : 'Guarde uma cópia dos seus dados para não perder nada (útil ao trocar de navegador ou dispositivo).'}</p></div>
+        <div class="card-pad" style="display:flex;flex-direction:column;gap:14px">
+          <div style="display:flex;flex-wrap:wrap;gap:10px">
+            <button class="btn soft" id="btnExport">${svg('save')} Exportar (copiar)</button>
+            <button class="btn ghost" id="btnImport">${svg('history')} Restaurar de um backup</button>
+          </div>
+          <textarea class="textarea" id="backupBox" placeholder="A cópia dos seus dados aparece aqui ao exportar. Para restaurar, cole aqui um backup e clique em Restaurar." style="min-height:96px;font-family:ui-monospace,monospace;font-size:12px"></textarea>
+          <div id="backupMsg"></div>
+          <p class="muted" style="font-size:12px">Exportar copia todos os dados para a área de transferência (e mostra na caixa acima). Restaurar substitui os dados atuais pelo backup colado.</p>
+        </div>
+      </div>
     </div>`;
     const row = document.getElementById('cfgRow');
     if (row && window.innerWidth < 720) row.style.gridTemplateColumns = '1fr';
+
+    document.getElementById('btnExport').addEventListener('click', async () => {
+      const json = JSON.stringify(db);
+      const box = document.getElementById('backupBox');
+      box.value = json;
+      box.focus(); box.select();
+      let copiado = false;
+      try { await navigator.clipboard.writeText(json); copiado = true; } catch (e) {
+        try { document.execCommand('copy'); copiado = true; } catch (e2) {}
+      }
+      document.getElementById('backupMsg').innerHTML = `<div class="form-ok">${svg('check')}${copiado ? 'Backup copiado para a área de transferência.' : 'Backup gerado na caixa acima — selecione e copie (Ctrl+C).'}</div>`;
+    });
+    document.getElementById('btnImport').addEventListener('click', () => {
+      const txt = document.getElementById('backupBox').value.trim();
+      const msg = document.getElementById('backupMsg');
+      if (!txt) { msg.innerHTML = `<div class="form-err">Cole um backup na caixa acima antes de restaurar.</div>`; return; }
+      let novo;
+      try { novo = JSON.parse(txt); } catch (e) { msg.innerHTML = `<div class="form-err">Backup inválido (não é um JSON válido).</div>`; return; }
+      if (!novo || !Array.isArray(novo.influenciadores) || !Array.isArray(novo.lancamentos) || !novo.config) {
+        msg.innerHTML = `<div class="form-err">Esse texto não parece ser um backup do Controle iGaming.</div>`; return;
+      }
+      openConfirm('Restaurar backup?', 'Os dados atuais serão substituídos pelos dados do backup. Isso vale também para a versão salva na sua conta.', 'Restaurar', () => {
+        db = novo;
+        db.exemplo = false;
+        if (db.seq == null) db.seq = 1 + Math.max(0, ...db.influenciadores.map((x) => x.id || 0), ...db.lancamentos.map((x) => x.id || 0));
+        normalize();
+        save();
+        closeModal();
+        viewConfig(main);
+      });
+    });
     document.getElementById('cfgSave').addEventListener('click', () => {
       const n = Number(document.getElementById('cfgVal').value);
       const msg = document.getElementById('cfgMsg');
@@ -2082,7 +2253,11 @@
      MODAIS
   ============================================================ */
   const modalRoot = document.getElementById('modalRoot');
-  function closeModal() { modalRoot.innerHTML = ''; document.body.style.overflow = ''; }
+  function closeModal() {
+    modalRoot.innerHTML = '';
+    document.body.style.overflow = '';
+    if (remoteStash) { const r = remoteStash; remoteStash = null; adotarRemoto(r); }
+  }
   function openModal(html, sm) {
     modalRoot.innerHTML = `<div class="modal-back" id="mBack"><div class="modal ${sm ? 'sm' : ''}">${html}</div></div>`;
     document.body.style.overflow = 'hidden';
@@ -2303,4 +2478,5 @@
   applyThemeButton();
   if (!location.hash) location.hash = '#/';
   router();
+  initCloud();
 </script>
