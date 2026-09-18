@@ -549,6 +549,11 @@
     background: var(--accent-soft);
     border-color: color-mix(in srgb, var(--accent) 30%, transparent);
   }
+  .mod-meta {
+    color: #10b981;
+    background: rgba(16, 185, 129, 0.13);
+    border-color: rgba(16, 185, 129, 0.3);
+  }
 
   /* Segmented control */
   .segmented {
@@ -1057,12 +1062,12 @@
   /* Model chooser cards */
   .model-pick {
     display: grid;
-    grid-template-columns: repeat(3, 1fr);
+    grid-template-columns: repeat(4, 1fr);
     gap: 8px;
   }
-  @media (max-width: 480px) {
+  @media (max-width: 560px) {
     .model-pick {
-      grid-template-columns: 1fr;
+      grid-template-columns: repeat(2, 1fr);
     }
   }
   .model-opt {
@@ -1517,7 +1522,7 @@
     const rand = (a, b) => Math.round(a + Math.random() * (b - a));
     infs.forEach((inf) => {
       const id = db.seq++;
-      db.influenciadores.push({ id, criadoEm: now, percentualComissao: null, valorFixo: null, recorrencia: null, valorPorStory: null, qtdStoriesPadrao: null, diasDivulgacao: null, ...inf });
+      db.influenciadores.push({ id, criadoEm: now, percentualComissao: null, valorFixo: null, recorrencia: null, valorPorStory: null, qtdStoriesPadrao: null, diasDivulgacao: null, metaDepositantes: null, valorMeta: null, percentualAntecipado: null, ...inf });
       const n = rand(6, 11);
       for (let i = 0; i < n; i++) {
         const depositos = Array.from({ length: rand(0, 4) }, () => rand(60, 700));
@@ -1674,7 +1679,7 @@
     const dep = (input.depositos || []).map((v) => Number(v) || 0);
     const total = somaDep(dep);
     const receitaLiquida = round2((receitaBruta * pct) / 100);
-    let valorPago = 0, qStories = null, vCobrado = null;
+    let valorPago = 0, qStories = null, vCobrado = null, depositantes = null;
     if (inf.modeloPagamento === 'stories') {
       qStories = Number(input.quantidadeStories) || 0;
       vCobrado = Number(input.valorCobrado) || 0;
@@ -1684,11 +1689,22 @@
     } else if (inf.modeloPagamento === 'percentual') {
       const c = Number(inf.percentualComissao) || 0;
       valorPago = input.valorPago != null && input.valorPago !== '' ? round2(Number(input.valorPago)) : round2((total * c) / 100);
+    } else if (inf.modeloPagamento === 'meta') {
+      const meta = Number(inf.metaDepositantes) || 0;
+      const valorMeta = Number(inf.valorMeta) || 0;
+      const ant = Number(inf.percentualAntecipado) || 0;
+      const antecipado = round2((valorMeta * ant) / 100);
+      const restante = round2(valorMeta - antecipado);
+      depositantes = input.depositantes != null && input.depositantes !== '' ? Math.trunc(Number(input.depositantes) || 0) : dep.length;
+      const bateu = meta > 0 && depositantes >= meta;
+      const autoPago = round2(antecipado + (bateu ? restante : 0));
+      valorPago = input.valorPago != null && input.valorPago !== '' ? round2(Number(input.valorPago)) : autoPago;
     }
     return {
       receitaBruta: round2(receitaBruta), percentualAplicado: pct, receitaLiquida, gastosExtras: round2(gastos),
       valorPago, lucro: round2(receitaLiquida - valorPago - gastos), totalDepositos: total,
       quantidadeStories: qStories, valorCobrado: vCobrado != null ? round2(vCobrado) : null,
+      depositantes,
     };
   }
 
@@ -1739,7 +1755,7 @@
   }
 
   const STATUS_LBL = { negociando: 'Negociando', fechado: 'Fechado', pausado: 'Pausado' };
-  const MOD_LBL = { stories: 'Stories', fixo: 'Fixo', percentual: 'Percentual' };
+  const MOD_LBL = { stories: 'Stories', fixo: 'Fixo', percentual: 'Percentual', meta: 'Meta' };
   const statusBadge = (s) => `<span class="badge st-${s}"><span class="dot"></span>${STATUS_LBL[s] || s}</span>`;
   const modBadge = (m) => `<span class="badge mod-${m}">${MOD_LBL[m] || m}</span>`;
 
@@ -2041,7 +2057,7 @@
       <div style="display:flex;flex-wrap:wrap;gap:10px;margin-bottom:18px">
         <div class="search">${svg('search')}<input class="input" id="fBusca" placeholder="Buscar por nome ou @…" value="${esc(infBusca)}"></div>
         <select class="select" id="fStatus" style="max-width:180px">${opt(['todos', 'negociando', 'fechado', 'pausado'], infStatus, { todos: 'Todos os status', negociando: 'Negociando', fechado: 'Fechado', pausado: 'Pausado' })}</select>
-        <select class="select" id="fModelo" style="max-width:180px">${opt(['todos', 'stories', 'fixo', 'percentual'], infModelo, { todos: 'Todos os modelos', stories: 'Stories', fixo: 'Fixo', percentual: 'Percentual' })}</select>
+        <select class="select" id="fModelo" style="max-width:180px">${opt(['todos', 'stories', 'fixo', 'percentual', 'meta'], infModelo, { todos: 'Todos os modelos', stories: 'Stories', fixo: 'Fixo', percentual: 'Percentual', meta: 'Meta' })}</select>
         <select class="select" id="fOrd" style="max-width:210px">${opt(['nome', 'lucro', 'roi', 'lancamentos'], infOrd, { nome: 'Ordenar: Nome', lucro: 'Ordenar: Lucro', roi: 'Ordenar: ROI', lancamentos: 'Ordenar: Nº lançamentos' })}</select>
       </div>
       ${filtrada.length ? `<div class="grid inf-grid">${cards}</div>`
@@ -2080,6 +2096,9 @@
     if (inf.modeloPagamento === 'stories') {
       if (inf.valorPorStory != null) metaChips.push(`${fmtBRL(inf.valorPorStory)} / story${inf.qtdStoriesPadrao != null ? ` · ${inf.qtdStoriesPadrao} stories` : ''}`);
       if (inf.diasDivulgacao != null) metaChips.push(`${svg('calendar')} ${inf.diasDivulgacao} dias de divulgação`);
+    }
+    if (inf.modeloPagamento === 'meta' && inf.valorMeta != null) {
+      metaChips.push(`${svg('target')} Meta ${inf.metaDepositantes ?? '?'} depositantes → ${fmtBRL(inf.valorMeta)}${inf.percentualAntecipado ? ` · ${inf.percentualAntecipado}% antecipado` : ''}`);
     }
 
     const metric = (lbl, val, icon, tone) => `<div class="metric"><div class="m-lbl">${svg(icon)}${lbl}</div><div class="m-val tnum" ${tone ? `style="color:${tone}"` : ''}>${val}</div></div>`;
@@ -2368,12 +2387,13 @@
     { v: 'stories', ico: 'film', t: 'Stories', d: 'Valor por post' },
     { v: 'fixo', ico: 'wallet', t: 'Fixo', d: 'Valor recorrente' },
     { v: 'percentual', ico: 'percent', t: 'Percentual', d: '% dos depósitos' },
+    { v: 'meta', ico: 'target', t: 'Meta', d: 'Bônus por depositantes' },
   ];
   function openInfForm(inf) {
     const ed = !!inf;
     const f = ed
-      ? { valorPorStory: '', qtdStoriesPadrao: '', diasDivulgacao: '', percentualComissao: '', valorFixo: '', recorrencia: 'mensal', ...inf }
-      : { nome: '', instagram: '', status: 'negociando', dataInicio: '', modeloPagamento: 'stories', percentualComissao: '', valorFixo: '', recorrencia: 'mensal', valorPorStory: '', qtdStoriesPadrao: '', diasDivulgacao: '', observacoes: '' };
+      ? { valorPorStory: '', qtdStoriesPadrao: '', diasDivulgacao: '', percentualComissao: '', valorFixo: '', recorrencia: 'mensal', metaDepositantes: '', valorMeta: '', percentualAntecipado: '', ...inf }
+      : { nome: '', instagram: '', status: 'negociando', dataInicio: '', modeloPagamento: 'stories', percentualComissao: '', valorFixo: '', recorrencia: 'mensal', valorPorStory: '', qtdStoriesPadrao: '', diasDivulgacao: '', metaDepositantes: '', valorMeta: '', percentualAntecipado: '', observacoes: '' };
 
     const render = () => {
       const deal = f.modeloPagamento === 'percentual'
@@ -2382,6 +2402,9 @@
         : f.modeloPagamento === 'fixo'
         ? `<div class="deal-grid"><div class="field"><label>Valor fixo (R$)</label><input type="number" min="0" step="0.01" id="iFixo" class="input" value="${f.valorFixo ?? ''}" placeholder="Ex: 1500"></div><div class="field"><label>Recorrência</label><select class="select" id="iRec">${opt(['mensal', 'quinzenal', 'semanal'], f.recorrencia || 'mensal', { mensal: 'Mensal', quinzenal: 'Quinzenal', semanal: 'Semanal' })}</select></div></div>
            <p class="muted" style="font-size:12px;margin:10px 0 0">Já entra como valor pago em cada lançamento (editável em reajustes pontuais).</p>`
+        : f.modeloPagamento === 'meta'
+        ? `<div class="deal-grid"><div class="field"><label>Meta de depositantes</label><input type="number" min="0" id="iMeta" class="input" value="${f.metaDepositantes ?? ''}" placeholder="Ex: 10"></div><div class="field"><label>Valor ao bater a meta (R$)</label><input type="number" min="0" step="0.01" id="iVMeta" class="input" value="${f.valorMeta ?? ''}" placeholder="Ex: 100"></div><div class="field"><label>Antecipado (%)</label><input type="number" min="0" max="100" step="1" id="iAnt" class="input" value="${f.percentualAntecipado ?? ''}" placeholder="Ex: 50"></div></div>
+           <p class="muted" style="font-size:12px;margin:10px 0 0">Ela recebe o <b>antecipado</b> ao postar e o restante quando bater a meta de depositantes. Ex: meta 10 · R$100 · 50% → R$50 na hora + R$50 ao atingir 10.</p>`
         : `<div class="deal-grid"><div class="field"><label>Valor por story (R$)</label><input type="number" min="0" step="0.01" id="iVStory" class="input" value="${f.valorPorStory ?? ''}" placeholder="Ex: 250"></div><div class="field"><label>Qtd. de stories</label><input type="number" min="0" id="iQStory" class="input" value="${f.qtdStoriesPadrao ?? ''}" placeholder="Ex: 3"></div><div class="field"><label>Dias de divulgação</label><input type="number" min="0" id="iDias" class="input" value="${f.diasDivulgacao ?? ''}" placeholder="Ex: 7"></div></div>
            <p class="muted" style="font-size:12px;margin:10px 0 0">Vira o padrão dos lançamentos — dá pra ajustar em cada post.</p>`;
 
@@ -2412,6 +2435,9 @@
       if (g('iVStory') !== undefined) f.valorPorStory = g('iVStory');
       if (g('iQStory') !== undefined) f.qtdStoriesPadrao = g('iQStory');
       if (g('iDias') !== undefined) f.diasDivulgacao = g('iDias');
+      if (g('iMeta') !== undefined) f.metaDepositantes = g('iMeta');
+      if (g('iVMeta') !== undefined) f.valorMeta = g('iVMeta');
+      if (g('iAnt') !== undefined) f.percentualAntecipado = g('iAnt');
     };
     const rerender = () => { readInto(); modalRoot.querySelector('.modal').innerHTML = render(); wire(); };
     const wire = () => {
@@ -2438,6 +2464,9 @@
         valorPorStory: f.modeloPagamento === 'stories' ? nOrNull(f.valorPorStory) : null,
         qtdStoriesPadrao: f.modeloPagamento === 'stories' ? nOrNull(f.qtdStoriesPadrao) : null,
         diasDivulgacao: f.modeloPagamento === 'stories' ? nOrNull(f.diasDivulgacao) : null,
+        metaDepositantes: f.modeloPagamento === 'meta' ? nOrNull(f.metaDepositantes) : null,
+        valorMeta: f.modeloPagamento === 'meta' ? nOrNull(f.valorMeta) : null,
+        percentualAntecipado: f.modeloPagamento === 'meta' ? nOrNull(f.percentualAntecipado) : null,
       };
       if (ed) { Object.assign(inf, rec); } else { db.influenciadores.push({ id: db.seq++, criadoEm: new Date().toISOString(), ...rec }); }
       save(); closeModal(); router();
@@ -2452,11 +2481,11 @@
     const ed = !!lanc;
     const modelo = inf.modeloPagamento;
     const f = ed
-      ? { data: lanc.data, cadastros: String(lanc.cadastros ?? ''), depositos: (lanc.depositos || []).map(String), receitaBruta: String(lanc.receitaBruta ?? ''), receitaBrutaManual: !!lanc.receitaBrutaManual || (lanc.receitaBruta != null && Math.abs((lanc.receitaBruta || 0) - somaDep(lanc.depositos)) > 0.01), percentualAplicado: String(lanc.percentualAplicado ?? ''), gastosExtras: String(lanc.gastosExtras ?? ''), observacoes: lanc.observacoes || '', quantidadeStories: lanc.quantidadeStories != null ? String(lanc.quantidadeStories) : '', valorCobrado: lanc.valorCobrado != null ? String(lanc.valorCobrado) : '', valorPago: lanc.valorPago != null ? String(lanc.valorPago) : '' }
+      ? { data: lanc.data, cadastros: String(lanc.cadastros ?? ''), depositos: (lanc.depositos || []).map(String), receitaBruta: String(lanc.receitaBruta ?? ''), receitaBrutaManual: !!lanc.receitaBrutaManual || (lanc.receitaBruta != null && Math.abs((lanc.receitaBruta || 0) - somaDep(lanc.depositos)) > 0.01), percentualAplicado: String(lanc.percentualAplicado ?? ''), gastosExtras: String(lanc.gastosExtras ?? ''), observacoes: lanc.observacoes || '', quantidadeStories: lanc.quantidadeStories != null ? String(lanc.quantidadeStories) : '', valorCobrado: lanc.valorCobrado != null ? String(lanc.valorCobrado) : '', valorPago: lanc.valorPago != null ? String(lanc.valorPago) : '', depositantes: lanc.depositantes != null ? String(lanc.depositantes) : '', depositantesManual: lanc.depositantes != null && lanc.depositantes !== (lanc.depositos || []).length }
       : { data: hojeISO(), cadastros: '', depositos: [], receitaBruta: '', receitaBrutaManual: false, percentualAplicado: String(db.config.minhaParticipacao), gastosExtras: '', observacoes: '',
           quantidadeStories: modelo === 'stories' && inf.qtdStoriesPadrao != null ? String(inf.qtdStoriesPadrao) : '',
           valorCobrado: modelo === 'stories' && inf.valorPorStory != null ? String(round2(inf.valorPorStory * (inf.qtdStoriesPadrao != null ? inf.qtdStoriesPadrao : 1))) : '',
-          valorPago: modelo === 'fixo' && inf.valorFixo != null ? String(inf.valorFixo) : '' };
+          valorPago: modelo === 'fixo' && inf.valorFixo != null ? String(inf.valorFixo) : '', depositantes: '', depositantesManual: false };
     const num = (v) => (v === '' || v == null ? 0 : Number(v) || 0);
     // Receita bruta acompanha a soma dos depósitos, a menos que editada à mão.
     const somaDepF = () => round2(f.depositos.reduce((a, v) => a + num(v), 0));
@@ -2469,16 +2498,35 @@
     };
     const hojeLanc = !ed ? db.lancamentos.find((l) => l.influenciadorId === inf.id && l.data === hojeISO()) : null;
 
+    // Depositantes (modelo meta) acompanham o nº de depósitos, salvo edição à mão.
+    const depositantesEff = () => (f.depositantesManual ? Math.trunc(num(f.depositantes)) : f.depositos.length);
+    const syncDepositantes = () => {
+      if (modelo === 'meta' && !f.depositantesManual) {
+        f.depositantes = String(f.depositos.length);
+        const e = document.getElementById('lDepositantes');
+        if (e) e.value = f.depositantes;
+      }
+    };
+    const metaCalc = () => {
+      const meta = num(inf.metaDepositantes), valorMeta = num(inf.valorMeta), ant = num(inf.percentualAntecipado);
+      const antecipado = round2((valorMeta * ant) / 100), restante = round2(valorMeta - antecipado);
+      const deps = depositantesEff();
+      const bateu = meta > 0 && deps >= meta;
+      const autoPago = round2(antecipado + (bateu ? restante : 0));
+      return { meta, valorMeta, ant, antecipado, restante, deps, bateu, autoPago };
+    };
+
     const preview = () => {
       const totalDep = f.depositos.reduce((a, v) => a + num(v), 0);
       const recLiq = (num(f.receitaBruta) * num(f.percentualAplicado)) / 100;
-      let pago = 0;
+      let pago = 0, meta = null;
       if (modelo === 'stories') pago = num(f.valorCobrado);
       else if (modelo === 'fixo') pago = num(f.valorPago);
+      else if (modelo === 'meta') { meta = metaCalc(); pago = f.valorPago !== '' ? num(f.valorPago) : meta.autoPago; }
       else pago = f.valorPago !== '' ? num(f.valorPago) : (totalDep * num(inf.percentualComissao)) / 100;
       const lucro = recLiq - pago - num(f.gastosExtras);
       const cps = modelo === 'stories' && num(f.quantidadeStories) > 0 ? num(f.valorCobrado) / num(f.quantidadeStories) : null;
-      return { totalDep, recLiq, lucro, cps };
+      return { totalDep, recLiq, lucro, cps, pago, meta };
     };
 
     const render = () => {
@@ -2487,6 +2535,14 @@
         ? `<div class="hint-box f"><div class="form-row c3"><div class="field"><label>Qtd. de stories</label><input type="number" min="0" id="lQtd" class="input" value="${f.quantidadeStories}" placeholder="Ex: 3"></div><div class="field"><label>Valor cobrado (R$)</label><input type="number" min="0" step="0.01" id="lCob" class="input" value="${f.valorCobrado}" placeholder="Ex: 250"></div><div class="field"><label>Custo por story</label><div class="readonly-val" id="lCps" style="color:#d946ef">${p.cps != null ? fmtBRL(p.cps) : '—'}</div></div></div></div>`
         : modelo === 'fixo'
         ? `<div class="hint-box s"><label style="display:block;color:var(--muted);font-size:13px;font-weight:500;margin-bottom:6px">Valor pago neste lançamento (R$)</label><input type="number" min="0" step="0.01" id="lPago" class="input" value="${f.valorPago}" placeholder="${inf.valorFixo ?? '0,00'}"><p style="margin:8px 0 0">Herdado do valor fixo cadastrado (${fmtBRL(inf.valorFixo || 0)}). Ajuste para reajustes pontuais.</p></div>`
+        : modelo === 'meta'
+        ? (() => { const mc = p.meta; const falta = Math.max(0, mc.meta - mc.deps); return `<div class="hint-box" style="border:1px solid rgba(16,185,129,0.3);background:rgba(16,185,129,0.08)">
+            <div class="form-row c2"><div class="field"><label>Depositantes</label><input type="number" min="0" id="lDepositantes" class="input" value="${f.depositantes}" placeholder="0"></div><div class="field"><label>Valor pago (auto)</label><input type="number" min="0" step="0.01" id="lPago" class="input" value="${f.valorPago}" placeholder="${fmtBRL(mc.autoPago)}"></div></div>
+            <div style="margin-top:10px;display:flex;flex-wrap:wrap;gap:8px;align-items:center">
+              <span class="badge ${mc.bateu ? 'st-fechado' : 'st-negociando'}" id="lMetaBadge">${mc.bateu ? '✓ Meta batida' : `${mc.deps}/${mc.meta} · faltam ${falta}`}</span>
+              <span class="muted" style="font-size:12px">Antecipado ${fmtBRL(mc.antecipado)} (${mc.ant}%)${mc.bateu ? ` + restante ${fmtBRL(mc.restante)}` : ` · restante ${fmtBRL(mc.restante)} ao bater a meta`}</span>
+            </div>
+            <p class="muted" style="font-size:12px;margin:9px 0 0" id="lMetaHint">Depositantes acompanha o nº de depósitos. Valor pago é automático — deixe vazio, ou informe para ajustar.</p></div>`; })()
         : `<div class="hint-box v"><label style="display:block;color:var(--muted);font-size:13px;font-weight:500;margin-bottom:6px">Valor pago (auto = ${inf.percentualComissao ?? 0}% dos depósitos)</label><input type="number" min="0" step="0.01" id="lPago" class="input" value="${f.valorPago}" placeholder="${fmtBRL((p.totalDep * num(inf.percentualComissao)) / 100)}"><p style="margin:8px 0 0">Calculado automaticamente sobre a soma dos depósitos. Deixe vazio para usar o valor automático, ou informe para revisar.</p></div>`;
       const deps = f.depositos.length
         ? `<div class="dep-list">${f.depositos.map((d, i) => `<div class="dep-item"><input type="number" min="0" step="0.01" class="input dep-inp" data-i="${i}" value="${d}" placeholder="0,00"><button type="button" class="icon-btn del dep-del" data-i="${i}">${svg('trash')}</button></div>`).join('')}</div>`
@@ -2515,11 +2571,22 @@
       if (g('lQtd') !== undefined) f.quantidadeStories = g('lQtd');
       if (g('lCob') !== undefined) f.valorCobrado = g('lCob');
       if (g('lPago') !== undefined) f.valorPago = g('lPago');
+      if (g('lDepositantes') !== undefined) f.depositantes = g('lDepositantes');
     };
     const updatePreview = () => {
       const p = preview();
       const set = (id, val) => { const e = document.getElementById(id); if (e) e.textContent = val; };
       set('lSoma', fmtBRL(p.totalDep)); set('lRecLiq', fmtBRL(p.recLiq)); set('lCps', p.cps != null ? fmtBRL(p.cps) : '—');
+      if (p.meta) {
+        const mc = p.meta;
+        const badge = document.getElementById('lMetaBadge');
+        if (badge) {
+          badge.textContent = mc.bateu ? '✓ Meta batida' : `${mc.deps}/${mc.meta} · faltam ${Math.max(0, mc.meta - mc.deps)}`;
+          badge.className = 'badge ' + (mc.bateu ? 'st-fechado' : 'st-negociando');
+        }
+        const pago = document.getElementById('lPago');
+        if (pago) pago.placeholder = fmtBRL(mc.autoPago);
+      }
       const lu = document.getElementById('lLucro'); if (lu) { lu.textContent = fmtBRL(p.lucro); lu.className = 'big tnum ' + (p.lucro < 0 ? 'neg' : 'pos'); }
     };
     const rerender = () => { readScalars(); modalRoot.querySelector('.modal').innerHTML = render(); wire(); };
@@ -2529,14 +2596,16 @@
       document.getElementById('mCancel').addEventListener('click', closeModal);
       document.getElementById('mSave').addEventListener('click', salvar);
       document.getElementById('lAddDep').addEventListener('click', addDepRow);
-      modalRoot.querySelectorAll('.l-chip').forEach((b) => b.addEventListener('click', () => { readScalars(); f.depositos.push(String(round2(num(b.dataset.v)))); syncReceita(); rerender(); }));
+      modalRoot.querySelectorAll('.l-chip').forEach((b) => b.addEventListener('click', () => { readScalars(); f.depositos.push(String(round2(num(b.dataset.v)))); syncReceita(); syncDepositantes(); rerender(); }));
       const abrirHoje = document.getElementById('lAbrirHoje');
       if (abrirHoje) abrirHoje.addEventListener('click', () => { closeModal(); openQuickDeposito(inf, hojeLanc); });
       modalRoot.querySelectorAll('.dep-inp').forEach((inp) => {
         inp.addEventListener('input', (e) => { f.depositos[+e.target.dataset.i] = e.target.value; syncReceita(); updatePreview(); });
         inp.addEventListener('keydown', (e) => { if (e.key === 'Enter') { e.preventDefault(); readScalars(); if (f.depositos[f.depositos.length - 1] !== '') addDepRow(); } });
       });
-      modalRoot.querySelectorAll('.dep-del').forEach((b) => b.addEventListener('click', () => { readScalars(); f.depositos.splice(+b.dataset.i, 1); syncReceita(); rerender(); }));
+      modalRoot.querySelectorAll('.dep-del').forEach((b) => b.addEventListener('click', () => { readScalars(); f.depositos.splice(+b.dataset.i, 1); syncReceita(); syncDepositantes(); rerender(); }));
+      const lDep = document.getElementById('lDepositantes');
+      if (lDep) lDep.addEventListener('input', (e) => { f.depositantesManual = e.target.value.trim() !== ''; if (!f.depositantesManual) syncDepositantes(); readScalars(); updatePreview(); });
       const lBruta = document.getElementById('lBruta');
       if (lBruta) lBruta.addEventListener('input', (e) => {
         f.receitaBrutaManual = e.target.value.trim() !== '';
@@ -2561,9 +2630,10 @@
       if (depositos.some((v) => v < 0)) { err.innerHTML = `<div class="form-err">Depósitos não podem ser negativos.</div>`; return; }
       const input = { depositos, receitaBruta: Math.max(0, num(f.receitaBruta)), percentualAplicado: Math.max(0, num(f.percentualAplicado)), gastosExtras: Math.max(0, num(f.gastosExtras)) };
       if (modelo === 'stories') { input.quantidadeStories = Math.max(0, Math.trunc(num(f.quantidadeStories))); input.valorCobrado = Math.max(0, num(f.valorCobrado)); }
-      if (modelo === 'fixo' || modelo === 'percentual') input.valorPago = f.valorPago === '' ? null : Math.max(0, num(f.valorPago));
+      if (modelo === 'fixo' || modelo === 'percentual' || modelo === 'meta') input.valorPago = f.valorPago === '' ? null : Math.max(0, num(f.valorPago));
+      if (modelo === 'meta') input.depositantes = f.depositantesManual ? Math.max(0, Math.trunc(num(f.depositantes))) : depositos.length;
       const c = calcLanc(input, inf);
-      const rec = { influenciadorId: inf.id, data: f.data, cadastros: Math.max(0, Math.trunc(num(f.cadastros))), depositos, receitaBruta: c.receitaBruta, receitaBrutaManual: !!f.receitaBrutaManual, percentualAplicado: c.percentualAplicado, receitaLiquida: c.receitaLiquida, gastosExtras: c.gastosExtras, valorPago: c.valorPago, lucro: c.lucro, quantidadeStories: c.quantidadeStories, valorCobrado: c.valorCobrado, observacoes: (f.observacoes || '').trim() || null };
+      const rec = { influenciadorId: inf.id, data: f.data, cadastros: Math.max(0, Math.trunc(num(f.cadastros))), depositos, receitaBruta: c.receitaBruta, receitaBrutaManual: !!f.receitaBrutaManual, percentualAplicado: c.percentualAplicado, receitaLiquida: c.receitaLiquida, gastosExtras: c.gastosExtras, valorPago: c.valorPago, lucro: c.lucro, quantidadeStories: c.quantidadeStories, valorCobrado: c.valorCobrado, depositantes: c.depositantes, observacoes: (f.observacoes || '').trim() || null };
       if (ed) { Object.assign(lanc, rec); } else { db.lancamentos.push({ id: db.seq++, criadoEm: new Date().toISOString(), ...rec }); }
       save(); closeModal(); viewDetalhe(document.getElementById('main'), inf.id);
     };
@@ -2583,9 +2653,14 @@
     const input = { depositos, receitaBruta, percentualAplicado: lanc.percentualAplicado, gastosExtras: lanc.gastosExtras };
     if (inf.modeloPagamento === 'stories') { input.quantidadeStories = lanc.quantidadeStories; input.valorCobrado = lanc.valorCobrado; }
     else if (inf.modeloPagamento === 'fixo') input.valorPago = lanc.valorPago;
-    else input.valorPago = null; // percentual: recalcula sobre a nova soma
+    else if (inf.modeloPagamento === 'meta') {
+      // Cada novo depósito conta como um depositante rumo à meta; recalcula o pago.
+      input.depositantes = (lanc.depositantes != null ? lanc.depositantes : (lanc.depositos || []).length) + novos.length;
+      input.valorPago = null;
+    } else input.valorPago = null; // percentual: recalcula sobre a nova soma
     const c = calcLanc(input, inf);
     Object.assign(lanc, { depositos, receitaBruta: c.receitaBruta, receitaLiquida: c.receitaLiquida, valorPago: c.valorPago, lucro: c.lucro });
+    if (inf.modeloPagamento === 'meta') lanc.depositantes = c.depositantes;
   }
 
   /* ---- Adição rápida de depósitos (o dinheiro que cai ao longo do dia) ---- */
