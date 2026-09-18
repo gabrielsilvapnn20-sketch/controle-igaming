@@ -46,7 +46,7 @@
       --border: #26263a;
       --border-soft: #202030;
       --text: #e9e9f4;
-      --muted: #9494ac;
+      --muted: #a6a6c2;
       --accent: #a78bfa;
       --accent-2: #c084fc;
       --accent-soft: rgba(167, 139, 250, 0.14);
@@ -69,7 +69,7 @@
     --border: #26263a;
     --border-soft: #202030;
     --text: #e9e9f4;
-    --muted: #9494ac;
+    --muted: #a6a6c2;
     --accent: #a78bfa;
     --accent-2: #c084fc;
     --accent-soft: rgba(167, 139, 250, 0.14);
@@ -94,10 +94,12 @@
   body {
     background: var(--bg);
     color: var(--text);
-    font-family: 'Inter', system-ui, -apple-system, sans-serif;
-    font-size: 14px;
-    line-height: 1.5;
+    font-family: 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+    font-size: 15px;
+    line-height: 1.55;
     -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
   }
   body::before {
     content: '';
@@ -424,6 +426,18 @@
   }
   .card-pad {
     padding: 20px;
+  }
+  .caixa-hero {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 14px;
+    align-items: center;
+    justify-content: space-between;
+    padding: 22px 24px;
+    background:
+      linear-gradient(120deg, color-mix(in srgb, var(--accent) 14%, transparent), transparent 62%),
+      var(--card);
+    border-color: color-mix(in srgb, var(--accent) 22%, var(--border));
   }
   .card-head {
     padding: 18px 20px;
@@ -1562,6 +1576,9 @@
   function normalize() {
     if (!db) return;
     if (!Array.isArray(db.presetsDeposito) || !db.presetsDeposito.length) db.presetsDeposito = [20, 30, 40, 50, 70, 100];
+    if (!db.caixa || typeof db.caixa !== 'object') db.caixa = { saldoInicial: 0, movimentos: [] };
+    if (typeof db.caixa.saldoInicial !== 'number') db.caixa.saldoInicial = 0;
+    if (!Array.isArray(db.caixa.movimentos)) db.caixa.movimentos = [];
     if (!Array.isArray(db.lancamentos)) return;
     db.lancamentos.forEach((l) => { if (l.lucro == null || isNaN(l.lucro)) l.lucro = lucroLanc(l); });
   }
@@ -1731,6 +1748,31 @@
     return cad > 0 ? round2(invest / cad) : null;
   }
 
+  /* ---- Caixa (fluxo de dinheiro) ---- */
+  const MOV_SINAL = { aporte: 1, retirada: -1, despesa: -1 };
+  const movValor = (m) => round2((MOV_SINAL[m.tipo] || 0) * (Number(m.valor) || 0));
+  function saldoCaixa() {
+    const lucroTotal = db.lancamentos.reduce((a, l) => a + (l.lucro || 0), 0);
+    const movTotal = (db.caixa.movimentos || []).reduce((a, m) => a + movValor(m), 0);
+    return round2((db.caixa.saldoInicial || 0) + lucroTotal + movTotal);
+  }
+  function resumoPeriodo(inicio, fim) {
+    const lancs = db.lancamentos.filter((l) => l.data >= inicio && l.data <= fim);
+    let entrou = 0, pagoInf = 0, gastos = 0, lucro = 0;
+    lancs.forEach((l) => { entrou += l.receitaLiquida; pagoInf += l.valorPago; gastos += l.gastosExtras; lucro += l.lucro; });
+    let aportes = 0, retiradas = 0, despesas = 0;
+    (db.caixa.movimentos || []).forEach((m) => {
+      if (m.data < inicio || m.data > fim) return;
+      if (m.tipo === 'aporte') aportes += Number(m.valor) || 0;
+      else if (m.tipo === 'retirada') retiradas += Number(m.valor) || 0;
+      else if (m.tipo === 'despesa') despesas += Number(m.valor) || 0;
+    });
+    const saiu = round2(pagoInf + gastos + retiradas + despesas);
+    const totalEntrou = round2(entrou + aportes);
+    const resultado = round2(lucro + aportes - retiradas - despesas);
+    return { entrou: round2(entrou), pagoInf: round2(pagoInf), gastos: round2(gastos), lucro: round2(lucro), aportes: round2(aportes), retiradas: round2(retiradas), despesas: round2(despesas), saiu, totalEntrou, resultado };
+  }
+
   function gerarDicas(lancs, m) {
     const dicas = [];
     const push = (tipo, titulo, texto) => dicas.push({ tipo, titulo, texto });
@@ -1857,6 +1899,7 @@
   const NAV = [
     { path: '', label: 'Dashboard', icon: 'dashboard' },
     { path: 'influenciadores', label: 'Influenciadores', icon: 'users' },
+    { path: 'caixa', label: 'Caixa', icon: 'wallet' },
     { path: 'ranking', label: 'Ranking', icon: 'trophy' },
     { path: 'config', label: 'Configurações', icon: 'settings' },
   ];
@@ -1879,6 +1922,7 @@
     if (parts[0] === 'influenciadores' && parts[1]) viewDetalhe(main, +parts[1]);
     else if (parts[0] === 'influenciadores') viewInfluenciadores(main);
     else if (parts[0] === 'ranking') viewRanking(main);
+    else if (parts[0] === 'caixa') viewCaixa(main);
     else if (parts[0] === 'config') viewConfig(main);
     else viewDashboard(main);
   }
@@ -1965,6 +2009,7 @@
       .map(([id, l]) => `<button data-preset="${id}" class="${dashPreset === id ? 'active' : ''}">${l}</button>`).join('');
     const temDados = d.m.qtdLancamentos > 0;
     const lucroNeg = d.cards.lucro.v < 0;
+    const saldoAtual = saldoCaixa();
 
     const customPanel = dashPreset === 'custom'
       ? `<div class="card card-pad" style="margin-bottom:18px;display:flex;flex-wrap:wrap;gap:14px;align-items:flex-end">
@@ -1974,14 +2019,20 @@
 
     main.innerHTML = `<div class="view">
       ${db.exemplo ? `<div class="banner"><span>👋 Você está vendo <b>dados de exemplo</b> para explorar o app. Comece do zero quando quiser.</span><button class="btn ghost sm" id="clearSeed">Limpar dados de exemplo</button></div>` : ''}
-      ${head('Dashboard', 'Visão geral da performance financeira da agência', `<div class="segmented" id="presets">${presetBtns}</div>`)}
+      ${head('Dashboard', 'Resumo do dinheiro no período', `<div class="segmented" id="presets">${presetBtns}</div>`)}
       ${customPanel}
+      <a href="#/caixa" class="card caixa-hero" style="text-decoration:none;color:inherit;margin-bottom:16px">
+        <div>
+          <div class="muted" style="font-size:13px;font-weight:500">Saldo atual em caixa</div>
+          <div class="tnum" style="font-size:32px;font-weight:800;letter-spacing:-0.03em;margin-top:2px;color:${saldoAtual < 0 ? 'var(--danger)' : 'var(--text)'}">${fmtBRL(saldoAtual)}</div>
+        </div>
+        <span class="btn ghost sm" style="pointer-events:none">Ver caixa ${svg('arrowRight')}</span>
+      </a>
       <div class="grid" style="grid-template-columns:repeat(auto-fit,minmax(180px,1fr))">
-        ${kpi('Receita bruta', fmtBRL(d.cards.receitaBruta.v), 'dollar', 'sky', d.cards.receitaBruta.t)}
-        ${kpi('Sua receita líquida', fmtBRL(d.cards.receitaLiquida.v), 'wallet', 'primary', d.cards.receitaLiquida.t)}
+        ${kpi(lucroNeg ? 'Prejuízo do período' : 'Lucro do período', fmtBRL(d.cards.lucro.v), 'trendUp', lucroNeg ? 'danger' : 'success', d.cards.lucro.t)}
+        ${kpi('Entrou (sua receita líquida)', fmtBRL(d.cards.receitaLiquida.v), 'wallet', 'success', d.cards.receitaLiquida.t)}
         ${kpi('Pago a influenciadores', fmtBRL(d.cards.totalPago.v), 'users', 'warning', d.cards.totalPago.t, true)}
         ${kpi('Gastos extras', fmtBRL(d.cards.gastosExtras.v), 'receipt', 'warning', d.cards.gastosExtras.t, true)}
-        ${kpi(lucroNeg ? 'Prejuízo do período' : 'Lucro do período', fmtBRL(d.cards.lucro.v), 'trendUp', lucroNeg ? 'danger' : 'success', d.cards.lucro.t)}
       </div>
       <div class="grid" style="grid-template-columns:2fr 1fr;margin-top:16px" id="chartsRow">
         <div class="card"><div class="card-head"><h3>Evolução do lucro diário</h3><p>Lucro líquido por dia no período</p></div>
@@ -2239,6 +2290,102 @@
 
     document.getElementById('crit').addEventListener('click', (e) => { const b = e.target.closest('button'); if (b) { rankCrit = b.dataset.crit; viewRanking(main); } });
     main.querySelectorAll('[data-go]').forEach((el) => el.addEventListener('click', () => go(el.dataset.go)));
+  }
+
+  /* ============================================================
+     VIEW: Caixa
+  ============================================================ */
+  const MOV_LBL = { aporte: 'Aporte', retirada: 'Retirada', despesa: 'Despesa' };
+  function viewCaixa(main) {
+    const hoje = hojeISO();
+    const iniMes = hoje.slice(0, 8) + '01';
+    const r = resumoPeriodo(iniMes, hoje);
+    const saldo = saldoCaixa();
+    const movs = [...(db.caixa.movimentos || [])].sort((a, b) => (b.data + b.id).localeCompare(a.data + a.id));
+    const mesNome = new Date(hoje + 'T00:00:00').toLocaleDateString('pt-BR', { month: 'long', year: 'numeric' });
+
+    const mini = (lbl, val, tone, sign) => `<div class="metric"><div class="m-lbl">${lbl}</div><div class="m-val tnum" ${tone ? `style="color:${tone}"` : ''}>${sign || ''}${fmtBRL(val)}</div></div>`;
+
+    main.innerHTML = `<div class="view">
+      ${head('Caixa', 'Seu dinheiro em caixa e o giro do mês', `<div style="display:flex;flex-wrap:wrap;gap:8px"><button class="btn" id="mvAporte">${svg('plus')} Aporte</button><button class="btn ghost" id="mvRetirada">Retirada</button><button class="btn ghost" id="mvDespesa">Despesa</button></div>`)}
+
+      <div class="card caixa-hero">
+        <div>
+          <div class="muted" style="font-size:13px;font-weight:500">Saldo atual em caixa</div>
+          <div class="tnum" style="font-size:38px;font-weight:800;letter-spacing:-0.03em;margin-top:4px;color:${saldo < 0 ? 'var(--danger)' : 'var(--text)'}">${fmtBRL(saldo)}</div>
+          <div class="muted" style="font-size:12px;margin-top:6px">Saldo inicial ${fmtBRL(db.caixa.saldoInicial || 0)} + lucro acumulado + aportes − retiradas/despesas</div>
+        </div>
+        <button class="btn ghost sm" id="editSaldo">${svg('pencil')} Ajustar saldo inicial</button>
+      </div>
+
+      <h3 style="font-size:16px;margin:22px 0 12px;text-transform:capitalize">${mesNome}</h3>
+      <div class="grid" style="grid-template-columns:repeat(auto-fit,minmax(150px,1fr))">
+        ${mini('Entrou (líquido + aportes)', r.totalEntrou, 'var(--success)', '+ ')}
+        ${mini('Saiu (pago + gastos + retiradas)', r.saiu, 'var(--danger)', '− ')}
+        ${mini('Lucro das parcerias', r.lucro, r.lucro < 0 ? 'var(--danger)' : 'var(--success)')}
+        ${mini(r.resultado < 0 ? 'Resultado do mês' : 'Giro do mês', r.resultado, r.resultado < 0 ? 'var(--danger)' : 'var(--success)')}
+      </div>
+
+      <div class="card" style="margin-top:20px">
+        <div class="card-head"><h3>Movimentações do caixa</h3><p>Aportes, retiradas e despesas lançados por você (o lucro das parcerias entra automático)</p></div>
+        ${movs.length ? `<div class="tbl-wrap"><table><thead><tr><th>Data</th><th>Tipo</th><th>Descrição</th><th class="ta-r">Valor</th><th class="ta-r">Ações</th></tr></thead><tbody>${movs.map((m) => `
+          <tr><td style="font-weight:600">${fmtData(m.data)}</td>
+            <td><span class="badge ${m.tipo === 'aporte' ? 'st-fechado' : 'st-negociando'}">${MOV_LBL[m.tipo]}</span></td>
+            <td>${esc(m.descricao || '—')}</td>
+            <td class="ta-r tnum ${MOV_SINAL[m.tipo] > 0 ? 'pos' : 'neg'}" style="font-weight:700">${MOV_SINAL[m.tipo] > 0 ? '+ ' : '− '}${fmtBRL(m.valor)}</td>
+            <td class="ta-r"><button class="icon-btn del" data-delmov="${m.id}" title="Excluir">${svg('trash')}</button></td></tr>`).join('')}</tbody></table></div>`
+          : emptyState('wallet', 'Nenhuma movimentação manual', 'Use os botões acima para registrar um aporte, uma retirada sua ou uma despesa avulsa.')}
+      </div>
+    </div>`;
+
+    document.getElementById('mvAporte').addEventListener('click', () => openMovimento('aporte'));
+    document.getElementById('mvRetirada').addEventListener('click', () => openMovimento('retirada'));
+    document.getElementById('mvDespesa').addEventListener('click', () => openMovimento('despesa'));
+    document.getElementById('editSaldo').addEventListener('click', openSaldoInicial);
+    main.querySelectorAll('[data-delmov]').forEach((b) => b.addEventListener('click', () => {
+      openConfirm('Excluir movimentação?', 'Ela será removida do caixa.', 'Excluir', () => {
+        db.caixa.movimentos = db.caixa.movimentos.filter((m) => m.id !== b.dataset.delmov);
+        save(); closeModal(); viewCaixa(main);
+      });
+    }));
+  }
+
+  function openSaldoInicial() {
+    openModal(`<div class="modal-head"><h2>Saldo inicial do caixa</h2><p>Quanto você tem em caixa hoje. O app soma o lucro e as movimentações a partir daí.</p><button class="icon-btn modal-x" id="mX">${svg('close')}</button></div>
+      <div class="modal-body"><div class="field"><label>Saldo inicial (R$)</label><input type="number" step="0.01" id="sInicial" class="input" style="font-size:17px;font-weight:700" value="${db.caixa.saldoInicial || 0}"></div><div id="sErr"></div></div>
+      <div class="modal-foot"><button class="btn ghost" id="mCancel">Cancelar</button><button class="btn" id="sSave">${svg('save')} Salvar</button></div>`, true);
+    document.getElementById('mX').addEventListener('click', closeModal);
+    document.getElementById('mCancel').addEventListener('click', closeModal);
+    document.getElementById('sSave').addEventListener('click', () => {
+      const v = Number(document.getElementById('sInicial').value);
+      if (isNaN(v)) { document.getElementById('sErr').innerHTML = `<div class="form-err">Valor inválido.</div>`; return; }
+      db.caixa.saldoInicial = round2(v);
+      save(); closeModal(); viewCaixa(document.getElementById('main'));
+    });
+    setTimeout(() => document.getElementById('sInicial')?.focus(), 30);
+  }
+
+  function openMovimento(tipo) {
+    const titulos = { aporte: 'Novo aporte (entrada)', retirada: 'Nova retirada (saída)', despesa: 'Nova despesa (saída)' };
+    const dicas = { aporte: 'Dinheiro que entrou no caixa de fora das parcerias.', retirada: 'Dinheiro que você tirou do caixa pro seu bolso.', despesa: 'Um gasto avulso pago pelo caixa (ferramentas, anúncios, etc.).' };
+    let data = hojeISO();
+    openModal(`<div class="modal-head"><h2>${titulos[tipo]}</h2><p>${dicas[tipo]}</p><button class="icon-btn modal-x" id="mX">${svg('close')}</button></div>
+      <div class="modal-body">
+        <div class="form-row c2"><div class="field"><label>Data</label><input type="date" id="mvData" class="input" value="${data}" max="${hojeISO()}"></div><div class="field"><label>Valor (R$)</label><input type="number" min="0" step="0.01" id="mvValor" class="input" placeholder="0,00"></div></div>
+        <div class="field"><label>Descrição <span class="muted" style="font-weight:400">(opcional)</span></label><input id="mvDesc" class="input" placeholder="Ex: ${tipo === 'despesa' ? 'anúncios no Instagram' : tipo === 'retirada' ? 'retirada pessoal' : 'entrada de sócio'}"></div>
+        <div id="mvErr"></div>
+      </div>
+      <div class="modal-foot"><button class="btn ghost" id="mCancel">Cancelar</button><button class="btn" id="mvSave">Adicionar</button></div>`);
+    document.getElementById('mX').addEventListener('click', closeModal);
+    document.getElementById('mCancel').addEventListener('click', closeModal);
+    document.getElementById('mvSave').addEventListener('click', () => {
+      const valor = Number(document.getElementById('mvValor').value);
+      const err = document.getElementById('mvErr');
+      if (!valor || valor <= 0) { err.innerHTML = `<div class="form-err">Informe um valor maior que zero.</div>`; return; }
+      db.caixa.movimentos.push({ id: 'm' + db.seq++, tipo, data: document.getElementById('mvData').value || hojeISO(), valor: round2(valor), descricao: document.getElementById('mvDesc').value.trim() || null, criadoEm: new Date().toISOString() });
+      save(); closeModal(); viewCaixa(document.getElementById('main'));
+    });
+    setTimeout(() => document.getElementById('mvValor')?.focus(), 30);
   }
 
   /* ============================================================
